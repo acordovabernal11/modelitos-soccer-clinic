@@ -161,6 +161,7 @@ function HowItWorksPage() {
   const [position, setPosition] = useState("Winger");
   const [goal, setGoal] = useState("Improve dribbling");
   const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const generatePlan = () => {
     const plans = {
@@ -254,7 +255,13 @@ function HowItWorksPage() {
       },
     };
 
-    setPlan(plans[position][goal]);
+    setLoading(true);
+    setPlan(null);
+
+    setTimeout(() => {
+      setPlan(plans[position][goal]);
+      setLoading(false);
+    }, 1200);
   };
 
   return (
@@ -287,7 +294,14 @@ function HowItWorksPage() {
           </button>
         </div>
 
-        {plan && (
+        {loading && (
+          <div className="loading-card">
+            <div className="spinner"></div>
+            <p>Analyzing player profile and generating custom plan...</p>
+          </div>
+        )}
+
+        {plan && !loading && (
           <div className="plan-card">
             <h3>Your AI Training Plan</h3>
             <p className="plan-subtitle">
