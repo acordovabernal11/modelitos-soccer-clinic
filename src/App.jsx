@@ -330,8 +330,8 @@ function ContactPage() {
         </p>
 
         <div className="contact-card">
-          <p><strong>Email:</strong> modelitosoccer@gmail.com</p>
-          <p><strong>Location:</strong> State College, PA</p>
+          <p><strong>Email:</strong> acordovabernal11@gmail.com</p>
+          <p><strong>Location:</strong> Oxford, PA</p>
           <p><strong>Training Type:</strong> Private 1-on-1 soccer development</p>
         </div>
       </section>
