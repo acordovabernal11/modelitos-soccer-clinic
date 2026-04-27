@@ -69,23 +69,9 @@ function HomePage() {
         <div className="form">
           {!submitted ? (
             <>
-              <input
-                placeholder="Your Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                placeholder="Your Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                onClick={() => {
-                  if (name.trim() && email.trim()) {
-                    setSubmitted(true);
-                  }
-                }}
-              >
+              <input placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} />
+              <input placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <button onClick={() => name.trim() && email.trim() && setSubmitted(true)}>
                 Join Waitlist
               </button>
             </>
@@ -102,24 +88,15 @@ function HomePage() {
         <div className="feature-grid">
           <div className="feature-card">
             <h3>Position-Specific Coaching</h3>
-            <p>
-              Sessions are built around the real demands of your role on the field,
-              not random generic drills.
-            </p>
+            <p>Sessions are built around the real demands of your role on the field.</p>
           </div>
           <div className="feature-card">
             <h3>Confidence Under Pressure</h3>
-            <p>
-              Improve technical ability and decision-making so you feel sharper in
-              real game moments.
-            </p>
+            <p>Improve technical ability and decision-making in real game moments.</p>
           </div>
           <div className="feature-card">
             <h3>Modern Training Approach</h3>
-            <p>
-              AI-style drill plans help players leave each session knowing exactly
-              what to work on next.
-            </p>
+            <p>AI-style drill plans help players know exactly what to work on next.</p>
           </div>
         </div>
       </section>
@@ -265,94 +242,274 @@ function HowItWorksPage() {
   };
 
   return (
-    <section className="section">
-      <h2>How It Works</h2>
-      <p>
-        This demo shows how the AI feature works. A player selects their position
-        and the skill they want to improve. Then the system generates a custom
-        weekly training plan.
-      </p>
-
-      <div className="ai-box">
-        <div className="ai-controls">
-          <select value={position} onChange={(e) => setPosition(e.target.value)} className="input">
-            <option>Winger</option>
-            <option>Striker</option>
-            <option>Midfielder</option>
-            <option>Defender</option>
-          </select>
-
-          <select value={goal} onChange={(e) => setGoal(e.target.value)} className="input">
-            <option>Improve shooting</option>
-            <option>Improve dribbling</option>
-            <option>Improve speed</option>
-            <option>Improve first touch</option>
-          </select>
-
-          <button className="primary-btn" onClick={generatePlan}>
-            Generate Training Plan
-          </button>
-        </div>
-
-        {loading && (
-          <div className="loading-card">
-            <div className="spinner"></div>
-            <p>Analyzing player profile and generating custom plan...</p>
-          </div>
-        )}
-
-        {plan && !loading && (
-          <div className="plan-card">
-            <h3>Your AI Training Plan</h3>
-            <p className="plan-subtitle">
-              Position: <strong>{position}</strong> | Focus: <strong>{goal}</strong>
-            </p>
-            <ul className="plan-list">
-              {plan.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function ContactPage() {
-  return (
     <>
       <section className="section">
-        <h2>Contact</h2>
+        <h2>How It Works</h2>
         <p>
-          Ready to train or want to learn more? Reach out and let’s talk about
-          your goals and how private coaching can help.
+          Modelitos Soccer Clinic combines personal coaching with a simple AI-powered
+          training assistant. The goal is to make every session more focused, every
+          drill more intentional, and every player more confident about what they
+          need to improve next.
         </p>
 
-        <div className="contact-card">
-          <p><strong>Email:</strong> acordovabernal11@gmail.com</p>
-          <p><strong>Location:</strong> Oxford, PA</p>
-          <p><strong>Training Type:</strong> Private 1-on-1 soccer development</p>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <h3>1. Player Profile</h3>
+            <p>
+              The player identifies their position, current skill level, strengths,
+              weaknesses, and short-term goals.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>2. Skill Focus</h3>
+            <p>
+              The player chooses one priority area such as shooting, dribbling,
+              speed, or first touch.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>3. AI Training Plan</h3>
+            <p>
+              The system generates a focused weekly plan with drills that match the
+              player’s role and goal.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>4. Live Coaching</h3>
+            <p>
+              In-person sessions are used to correct technique, build habits, and
+              apply the plan in realistic game situations.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>5. Progress Review</h3>
+            <p>
+              The player reviews what improved, what still needs work, and what the
+              next training focus should be.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>6. Repeat & Improve</h3>
+            <p>
+              Each week builds on the last so the player is not guessing what to
+              train next.
+            </p>
+          </div>
         </div>
       </section>
 
       <section className="section">
-        <h2>Simple Pricing</h2>
+        <h2>Interactive AI Training Demo</h2>
+        <p>
+          This demo shows the core app feature. Select a player position and a skill
+          goal, then generate a sample weekly training plan. In a future version,
+          players will be able to upload video clips so the system can recommend
+          even more specific drills.
+        </p>
+
+        <div className="ai-box">
+          <div className="ai-controls">
+            <select value={position} onChange={(e) => setPosition(e.target.value)} className="input">
+              <option>Winger</option>
+              <option>Striker</option>
+              <option>Midfielder</option>
+              <option>Defender</option>
+            </select>
+
+            <select value={goal} onChange={(e) => setGoal(e.target.value)} className="input">
+              <option>Improve shooting</option>
+              <option>Improve dribbling</option>
+              <option>Improve speed</option>
+              <option>Improve first touch</option>
+            </select>
+
+            <button className="primary-btn" onClick={generatePlan}>
+              Generate Training Plan
+            </button>
+          </div>
+
+          {loading && (
+            <div className="loading-card">
+              <div className="spinner"></div>
+              <p>Analyzing player profile and generating custom plan...</p>
+            </div>
+          )}
+
+          {plan && !loading && (
+            <div className="plan-card">
+              <h3>Your AI Training Plan</h3>
+              <p className="plan-subtitle">
+                Position: <strong>{position}</strong> | Focus: <strong>{goal}</strong>
+              </p>
+              <ul className="plan-list">
+                {plan.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>What Makes This Better?</h2>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <h3>No Random Training</h3>
+            <p>
+              Players do not just show up and do random drills. Every session is
+              connected to a clear development goal.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Built Around Position</h3>
+            <p>
+              A winger, striker, midfielder, and defender need different habits.
+              The plan changes based on the player’s actual role.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Clear Next Steps</h3>
+            <p>
+              After training, the player leaves with a plan they can keep working
+              on during the week.
+            </p>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ContactPage() {
+  const [sent, setSent] = useState(false);
+
+  return (
+    <>
+      <section className="section">
+        <h2>Contact Modelitos Soccer Clinic</h2>
+        <p>
+          Ready to train or want to learn more? Send a message with the player’s
+          age, position, current level, and main goal. I will follow up with
+          availability, recommended session type, and next steps.
+        </p>
+
+        <div className="contact-card">
+          <p><strong>Email:</strong> modelitosoccer@gmail.com</p>
+          <p><strong>Location:</strong> State College, PA</p>
+          <p><strong>Training Type:</strong> Private 1-on-1 soccer development</p>
+          <p><strong>Best For:</strong> Middle school, high school, and serious beginner players</p>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Training Inquiry Form</h2>
+        <p>
+          This form helps collect the information needed to recommend the right
+          training plan. For now, it shows a confirmation message. Later, it can
+          connect to Supabase to save real customer inquiries.
+        </p>
+
+        {!sent ? (
+          <div className="form">
+            <input placeholder="Player or parent name" />
+            <input placeholder="Email address" />
+            <input placeholder="Player age and position" />
+            <input placeholder="Main goal: shooting, dribbling, speed, confidence, etc." />
+            <button onClick={() => setSent(true)}>Send Training Inquiry</button>
+          </div>
+        ) : (
+          <p className="success">
+            Thanks! Your training inquiry has been received. I’ll follow up with
+            next steps and available training times.
+          </p>
+        )}
+      </section>
+
+      <section className="section">
+        <h2>Training Options</h2>
         <div className="pricing-grid">
           <div className="pricing-card">
             <h3>Single Session</h3>
             <p className="price">$40</p>
-            <p>One focused private training session</p>
+            <p>One focused private training session for a specific skill or goal.</p>
           </div>
+
           <div className="pricing-card featured-pricing">
             <h3>Weekly Plan</h3>
             <p className="price">$140</p>
-            <p>4 sessions + AI training plan support</p>
+            <p>Four sessions plus AI-style drill recommendations for the week.</p>
           </div>
+
           <div className="pricing-card">
             <h3>Custom Package</h3>
             <p className="price">Contact Me</p>
-            <p>Built around player goals and availability</p>
+            <p>Built around player goals, schedule, position, and development needs.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>What to Expect</h2>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <h3>Before Training</h3>
+            <p>
+              We identify the player’s goals and choose the main skill area for the
+              session.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>During Training</h3>
+            <p>
+              Sessions focus on technique, repetition, decision-making, and realistic
+              game actions.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>After Training</h3>
+            <p>
+              The player receives clear feedback and a short plan for what to keep
+              practicing.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Frequently Asked Questions</h2>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <h3>Who is this for?</h3>
+            <p>
+              Players who want more focused development than a normal team practice
+              can provide.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Do beginners qualify?</h3>
+            <p>
+              Yes. The training can be adjusted for beginner, intermediate, or more
+              competitive players.
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Does the AI replace coaching?</h3>
+            <p>
+              No. The AI feature supports the coaching by helping organize drills
+              and giving players a clear plan.
+            </p>
           </div>
         </div>
       </section>
