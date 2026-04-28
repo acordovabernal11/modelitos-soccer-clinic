@@ -25,12 +25,12 @@ function HomePage() {
     <>
       <section className="hero">
         <div className="hero-overlay">
-          <p className="eyebrow">Private Coaching • AI Drill Plans • Serious Development</p>
-          <h1>Elite Private Soccer Training for Serious Players</h1>
+          <p className="eyebrow">Private Coaching • Small Groups • Team Training • AI Drill Plans</p>
+          <h1>Elite Soccer Training for Players Who Want to Stand Out</h1>
           <p className="hero-text">
-            Modelitos Soccer Clinic helps ambitious soccer players sharpen their
-            technical skills, build confidence, and improve decision-making
-            through personalized 1-on-1 coaching and AI-powered training plans.
+            Modelitos Soccer Clinic helps motivated soccer players improve their technique,
+            confidence, speed of play, and decision-making through personalized coaching
+            and AI-powered training plans.
           </p>
 
           <div className="hero-buttons">
@@ -45,15 +45,15 @@ function HomePage() {
           <div className="hero-badges">
             <div className="badge-card">
               <h3>1-on-1</h3>
-              <p>Personalized private training</p>
+              <p>Focused private development</p>
+            </div>
+            <div className="badge-card">
+              <h3>Groups</h3>
+              <p>Small group competitive sessions</p>
             </div>
             <div className="badge-card">
               <h3>AI Plans</h3>
-              <p>Custom weekly drill suggestions</p>
-            </div>
-            <div className="badge-card">
-              <h3>Player Growth</h3>
-              <p>Technique, confidence, and game IQ</p>
+              <p>Custom drills based on position and goals</p>
             </div>
           </div>
         </div>
@@ -62,8 +62,8 @@ function HomePage() {
       <section className="section">
         <h2>Join the Waitlist</h2>
         <p>
-          Leave your name and email to hear about training openings, future
-          sessions, and personalized development options.
+          Leave your name and email to hear about training openings, camps, clinics,
+          and new player development opportunities.
         </p>
 
         <div className="form">
@@ -84,19 +84,19 @@ function HomePage() {
       </section>
 
       <section className="section">
-        <h2>Why Players Choose Modelitos Soccer Clinic</h2>
+        <h2>Training Built Around Player Growth</h2>
         <div className="feature-grid">
           <div className="feature-card">
-            <h3>Position-Specific Coaching</h3>
-            <p>Sessions are built around the real demands of your role on the field.</p>
+            <h3>Technical Skill</h3>
+            <p>First touch, ball control, dribbling, finishing, passing, and weak foot development.</p>
           </div>
           <div className="feature-card">
-            <h3>Confidence Under Pressure</h3>
-            <p>Improve technical ability and decision-making in real game moments.</p>
+            <h3>Game IQ</h3>
+            <p>Decision-making, scanning, positioning, movement off the ball, and confidence under pressure.</p>
           </div>
           <div className="feature-card">
-            <h3>Modern Training Approach</h3>
-            <p>AI-style drill plans help players know exactly what to work on next.</p>
+            <h3>Clear Training Plan</h3>
+            <p>Every player leaves with a focused plan instead of random drills with no direction.</p>
           </div>
         </div>
       </section>
@@ -107,13 +107,13 @@ function HomePage() {
 function AboutPage() {
   return (
     <section className="section">
-      <h2>About Me</h2>
+      <h2>About Modelitos Soccer Clinic</h2>
       <p>
-        I provide private soccer training focused on technical development,
-        confidence, and real game situations. Players receive personalized
-        training plans based on their position, goals, and areas that need the
-        most improvement. The goal is to help serious players train with purpose
-        and stand out on the field.
+        Modelitos Soccer Clinic is a soccer training service focused on helping players
+        improve with purpose. Instead of doing random drills, each session is designed
+        around the player’s position, skill level, goals, and areas for improvement.
+        The service combines live coaching with AI-powered training recommendations so
+        players know exactly what to work on next.
       </p>
 
       <div className="photos">
@@ -246,59 +246,101 @@ function HowItWorksPage() {
       <section className="section">
         <h2>How It Works</h2>
         <p>
-          Modelitos Soccer Clinic combines personal coaching with a simple AI-powered
-          training assistant. The goal is to make every session more focused, every
-          drill more intentional, and every player more confident about what they
-          need to improve next.
+          Modelitos Soccer Clinic uses a simple but powerful process: evaluate the player,
+          choose the right training format, train with purpose, and use AI-generated drill
+          plans to keep development going after the session ends.
         </p>
 
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>1. Player Profile</h3>
-            <p>
-              The player identifies their position, current skill level, strengths,
-              weaknesses, and short-term goals.
-            </p>
+        <div className="timeline">
+          <div className="timeline-card">
+            <span>01</span>
+            <h3>Player Evaluation</h3>
+            <p>We identify the player’s position, age, strengths, weaknesses, and training goals.</p>
           </div>
 
-          <div className="feature-card">
-            <h3>2. Skill Focus</h3>
-            <p>
-              The player chooses one priority area such as shooting, dribbling,
-              speed, or first touch.
-            </p>
+          <div className="timeline-card">
+            <span>02</span>
+            <h3>Training Type Selection</h3>
+            <p>The player chooses the right format: private, small group, team training, or clinic.</p>
           </div>
 
-          <div className="feature-card">
-            <h3>3. AI Training Plan</h3>
-            <p>
-              The system generates a focused weekly plan with drills that match the
-              player’s role and goal.
-            </p>
+          <div className="timeline-card">
+            <span>03</span>
+            <h3>AI Drill Plan</h3>
+            <p>The demo creates a custom weekly plan based on position and skill focus.</p>
           </div>
 
-          <div className="feature-card">
-            <h3>4. Live Coaching</h3>
-            <p>
-              In-person sessions are used to correct technique, build habits, and
-              apply the plan in realistic game situations.
-            </p>
+          <div className="timeline-card">
+            <span>04</span>
+            <h3>Live Coaching</h3>
+            <p>Training focuses on technique, repetition, decision-making, and real game actions.</p>
           </div>
 
-          <div className="feature-card">
-            <h3>5. Progress Review</h3>
+          <div className="timeline-card">
+            <span>05</span>
+            <h3>Progress Review</h3>
+            <p>Players receive clear feedback and a next-step plan to keep improving.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Training Formats</h2>
+        <div className="training-grid">
+          <div className="training-card">
+            <div className="training-icon">⚽</div>
+            <h3>1-on-1 Training</h3>
             <p>
-              The player reviews what improved, what still needs work, and what the
-              next training focus should be.
+              Best for players who want personal attention, technical correction,
+              and a training plan built directly around their goals.
             </p>
+            <ul>
+              <li>Private skill development</li>
+              <li>Position-specific drills</li>
+              <li>Confidence and technique focus</li>
+            </ul>
           </div>
 
-          <div className="feature-card">
-            <h3>6. Repeat & Improve</h3>
+          <div className="training-card">
+            <div className="training-icon">👥</div>
+            <h3>Small Group Sessions</h3>
             <p>
-              Each week builds on the last so the player is not guessing what to
-              train next.
+              Best for 2–5 players who want competitive training with more game-like
+              pressure and decision-making.
             </p>
+            <ul>
+              <li>Small-sided competition</li>
+              <li>Passing and movement</li>
+              <li>1v1 and 2v2 situations</li>
+            </ul>
+          </div>
+
+          <div className="training-card">
+            <div className="training-icon">🏟️</div>
+            <h3>Team Training</h3>
+            <p>
+              Built for teams that want focused sessions around chemistry, tactical
+              awareness, spacing, and team habits.
+            </p>
+            <ul>
+              <li>Team shape and movement</li>
+              <li>Communication</li>
+              <li>Game-speed exercises</li>
+            </ul>
+          </div>
+
+          <div className="training-card">
+            <div className="training-icon">🏆</div>
+            <h3>Camps & Clinics</h3>
+            <p>
+              High-energy training events focused on skill development, confidence,
+              competition, and a fun group learning environment.
+            </p>
+            <ul>
+              <li>Skill stations</li>
+              <li>Competitive challenges</li>
+              <li>Fun group environment</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -306,10 +348,9 @@ function HowItWorksPage() {
       <section className="section">
         <h2>Interactive AI Training Demo</h2>
         <p>
-          This demo shows the core app feature. Select a player position and a skill
-          goal, then generate a sample weekly training plan. In a future version,
-          players will be able to upload video clips so the system can recommend
-          even more specific drills.
+          Select a player position and development goal. The demo will generate a
+          sample weekly plan. In a future version, this feature could analyze uploaded
+          training videos and recommend even more specific drills.
         </p>
 
         <div className="ai-box">
@@ -355,35 +396,6 @@ function HowItWorksPage() {
           )}
         </div>
       </section>
-
-      <section className="section">
-        <h2>What Makes This Better?</h2>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>No Random Training</h3>
-            <p>
-              Players do not just show up and do random drills. Every session is
-              connected to a clear development goal.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Built Around Position</h3>
-            <p>
-              A winger, striker, midfielder, and defender need different habits.
-              The plan changes based on the player’s actual role.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Clear Next Steps</h3>
-            <p>
-              After training, the player leaves with a plan they can keep working
-              on during the week.
-            </p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
@@ -396,27 +408,21 @@ function ContactPage() {
       <section className="section">
         <h2>Contact Modelitos Soccer Clinic</h2>
         <p>
-          Ready to train or want to learn more? Send a message with the player’s
-          age, position, current level, and main goal. I will follow up with
-          availability, recommended session type, and next steps.
+          Ready to train or want to learn more? Send a message with the player’s age,
+          position, current level, and main goal. I will follow up with recommended
+          training options and next steps.
         </p>
 
         <div className="contact-card">
           <p><strong>Email:</strong> modelitosoccer@gmail.com</p>
           <p><strong>Location:</strong> State College, PA</p>
-          <p><strong>Training Type:</strong> Private 1-on-1 soccer development</p>
-          <p><strong>Best For:</strong> Middle school, high school, and serious beginner players</p>
+          <p><strong>Training Types:</strong> 1-on-1, small group, team training, camps, and clinics</p>
+          <p><strong>Best For:</strong> Youth, middle school, high school, and motivated beginner players</p>
         </div>
       </section>
 
       <section className="section">
         <h2>Training Inquiry Form</h2>
-        <p>
-          This form helps collect the information needed to recommend the right
-          training plan. For now, it shows a confirmation message. Later, it can
-          connect to Supabase to save real customer inquiries.
-        </p>
-
         {!sent ? (
           <div className="form">
             <input placeholder="Player or parent name" />
@@ -427,89 +433,73 @@ function ContactPage() {
           </div>
         ) : (
           <p className="success">
-            Thanks! Your training inquiry has been received. I’ll follow up with
-            next steps and available training times.
+            Thanks! Your training inquiry has been received. I’ll follow up with next steps.
           </p>
         )}
       </section>
 
       <section className="section">
-        <h2>Training Options</h2>
+        <h2>Training Packages & Pricing</h2>
+        <p>
+          Choose the training format that best fits the player’s goals, schedule, and level of development.
+          Each option is designed to provide focused coaching, clear feedback, and a better plan for improvement.
+        </p>
+
         <div className="pricing-grid">
-          <div className="pricing-card">
-            <h3>Single Session</h3>
-            <p className="price">$40</p>
-            <p>One focused private training session for a specific skill or goal.</p>
-          </div>
-
           <div className="pricing-card featured-pricing">
-            <h3>Weekly Plan</h3>
-            <p className="price">$140</p>
-            <p>Four sessions plus AI-style drill recommendations for the week.</p>
+            <h3>1-on-1 Training Sessions</h3>
+            <p className="price">$60</p>
+            <p>
+              Private individual training built around one player’s specific needs. Best for players
+              who want focused attention, technical correction, and a personalized development plan.
+            </p>
           </div>
 
           <div className="pricing-card">
-            <h3>Custom Package</h3>
-            <p className="price">Contact Me</p>
-            <p>Built around player goals, schedule, position, and development needs.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <h2>What to Expect</h2>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>Before Training</h3>
+            <h3>Small Group Sessions</h3>
+            <p className="price">$25</p>
             <p>
-              We identify the player’s goals and choose the main skill area for the
-              session.
+              Training for 2–5 players who want a competitive environment while still receiving
+              personal feedback. Great for friends, teammates, or players with similar goals.
             </p>
           </div>
 
-          <div className="feature-card">
-            <h3>During Training</h3>
+          <div className="pricing-card">
+            <h3>Team Training</h3>
+            <p className="price">$150</p>
             <p>
-              Sessions focus on technique, repetition, decision-making, and realistic
-              game actions.
+              Full team sessions focused on communication, spacing, movement, decision-making,
+              and game-like situations that help the team improve together.
             </p>
           </div>
 
-          <div className="feature-card">
-            <h3>After Training</h3>
+          <div className="pricing-card">
+            <h3>Camps & Clinics</h3>
+            <p className="price">$100</p>
             <p>
-              The player receives clear feedback and a short plan for what to keep
-              practicing.
+              High-energy training events designed for skill development, competition,
+              confidence-building, and a fun group learning environment.
             </p>
           </div>
         </div>
       </section>
 
       <section className="section">
-        <h2>Frequently Asked Questions</h2>
+        <h2>Which Option Is Best?</h2>
         <div className="feature-grid">
           <div className="feature-card">
-            <h3>Who is this for?</h3>
-            <p>
-              Players who want more focused development than a normal team practice
-              can provide.
-            </p>
+            <h3>Choose 1-on-1 if...</h3>
+            <p>You want the most personal attention and a plan built directly around one player.</p>
           </div>
 
           <div className="feature-card">
-            <h3>Do beginners qualify?</h3>
-            <p>
-              Yes. The training can be adjusted for beginner, intermediate, or more
-              competitive players.
-            </p>
+            <h3>Choose Small Group if...</h3>
+            <p>You want training with friends, competition, and more game-like pressure.</p>
           </div>
 
           <div className="feature-card">
-            <h3>Does the AI replace coaching?</h3>
-            <p>
-              No. The AI feature supports the coaching by helping organize drills
-              and giving players a clear plan.
-            </p>
+            <h3>Choose Team Training if...</h3>
+            <p>Your team needs better chemistry, communication, spacing, or tactical habits.</p>
           </div>
         </div>
       </section>
