@@ -111,11 +111,17 @@ html {
 }
 
 .badge-card {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid #bfdbfe;
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #dbeafe;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.badge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
 .badge-card h3 {
@@ -196,6 +202,35 @@ html {
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
   margin-top: 30px;
+}
+
+.experience-section .section h2 {
+  margin-bottom: 8px;
+}
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.experience-card {
+  background: #eef6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 20px;
+  padding: 28px;
+  min-height: 220px;
+}
+
+.experience-card h3 {
+  color: #1d4ed8;
+  margin-top: 0;
+}
+
+.experience-card p {
+  color: #334155;
+  line-height: 1.8;
 }
 
 .feature-card {
@@ -419,14 +454,57 @@ html {
   color: #1e3a8a;
 }
 
+.plan-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weekly-focus-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.plan-card h4 {
+  margin-bottom: 10px;
+  margin-top: 28px;
+  color: #1d4ed8;
+}
+
+.plan-day {
+  border-top: 1px solid #dbeafe;
+  padding-top: 20px;
+}
+
 .plan-subtitle {
   margin-bottom: 16px;
   color: #475569;
 }
 
+.plan-custom-details {
+  margin: 0 0 18px 0;
+  color: #334155;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  max-width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #0f172a;
+  font-size: 16px;
+  resize: vertical;
+}
+
 .plan-list {
   padding-left: 20px;
-  margin: 0;
+  margin: 0 0 14px 0;
 }
 
 .plan-list li {
@@ -488,7 +566,8 @@ iframe {
 /* RESPONSIVE */
 @media (max-width: 1100px) {
   .timeline,
-  .pricing-grid {
+  .pricing-grid,
+  .experience-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -499,7 +578,8 @@ iframe {
   .feature-grid,
   .training-grid,
   .pricing-grid,
-  .timeline {
+  .timeline,
+  .experience-grid {
     grid-template-columns: 1fr;
   }
 
