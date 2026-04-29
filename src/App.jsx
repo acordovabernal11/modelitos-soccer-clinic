@@ -101,6 +101,32 @@ function HomePage() {
         </div>
       </section>
 
+      <section className="section feature-summary-section">
+        <h2>Feature Summary</h2>
+        <p>
+          This app helps players discover better training through position-specific plans,
+          clear weekly progress, and experience-backed insights.
+        </p>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <h3>Interactive AI Plan</h3>
+            <p>Users choose their position and goal, then generate a customized weekly training plan.</p>
+          </div>
+          <div className="feature-card">
+            <h3>Real Player Experience</h3>
+            <p>Content is backed by college-level play and professional experience in Mexico and Spain.</p>
+          </div>
+          <div className="feature-card">
+            <h3>Clear Value for Clients</h3>
+            <p>Every training option includes clear pricing and realistic outcomes, not sales projections.</p>
+          </div>
+          <div className="feature-card">
+            <h3>Easy Navigation</h3>
+            <p>The site is structured for fast access to home, about, training demos, and contact details.</p>
+          </div>
+        </div>
+      </section>
+
       <section className="section experience-section">
         <h2>Pro-Level Soccer Playing Experience</h2>
         <p>
