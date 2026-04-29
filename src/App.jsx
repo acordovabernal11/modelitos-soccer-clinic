@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
+import { supabase, inquiries, plans } from "./supabase";
+import { ProfilePage } from "./pages/ProfilePage";
+import { AdminDashboard } from "./pages/AdminDashboard";
 import "./App.css";
 
 function Navbar() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user);
+    });
+  }, []);
+
   return (
     <nav className="nav">
       <h2 className="logo">Modelitos Soccer Clinic</h2>
@@ -11,6 +22,8 @@ function Navbar() {
         <Link to="/about">About</Link>
         <Link to="/how-it-works">How It Works</Link>
         <Link to="/contact">Contact</Link>
+        {user && <Link to="/profile">My Profile</Link>}
+        {user && <Link to="/admin">Admin</Link>}
       </div>
     </nav>
   );
@@ -20,6 +33,33 @@ function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleJoinWaitlist = async () => {
+    if (!name.trim() || !email.trim()) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await inquiries.create({
+      name: name.trim(),
+      email: email.trim(),
+      player_age: "",
+      position: "",
+      goal: "",
+      status: "new"
+    });
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      setSubmitted(true);
+      setName("");
+      setEmail("");
+    }
+    setLoading(false);
+  };
 
   return (
     <>
@@ -71,8 +111,8 @@ function HomePage() {
             <>
               <input placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} />
               <input placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button onClick={() => name.trim() && email.trim() && setSubmitted(true)}>
-                Join Waitlist
+              <button onClick={handleJoinWaitlist} disabled={loading}>
+                {loading ? "Joining..." : "Join Waitlist"}
               </button>
             </>
           ) : (
@@ -201,6 +241,13 @@ function HowItWorksPage() {
   const [customDetails, setCustomDetails] = useState("");
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [savedPlan, setSavedPlan] = useState(false);
+  const [user, setUser] = useState(null);
+  const [savingPlan, setSavingPlan] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+  }, []);
 
   const generatePlan = () => {
     const plans = {
@@ -872,6 +919,33 @@ function HowItWorksPage() {
     }, 1200);
   };
 
+  const handleSavePlan = async () => {
+    if (!user) {
+      alert("Please sign in to save your training plan");
+      return;
+    }
+
+    if (!plan) {
+      alert("No plan to save");
+      return;
+    }
+
+    setSavingPlan(true);
+    const { error } = await plans.create(user.id, {
+      position,
+      goal,
+      plan_data: plan
+    });
+
+    if (error) {
+      alert("Error saving plan: " + error.message);
+    } else {
+      setSavedPlan(true);
+      setTimeout(() => setSavedPlan(false), 3000);
+    }
+    setSavingPlan(false);
+  };
+
   return (
     <>
       <section className="section">
@@ -1048,6 +1122,20 @@ function HowItWorksPage() {
               ))}
             </div>
           )}
+
+          {plan && (
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <button
+                onClick={handleSavePlan}
+                disabled={savingPlan}
+                className="primary-btn"
+                style={{ marginRight: '10px' }}
+              >
+                {savingPlan ? "Saving..." : "Save This Plan"}
+              </button>
+              {savedPlan && <p className="success">Plan saved successfully!</p>}
+            </div>
+          )}
         </div>
       </section>
     </>
@@ -1056,6 +1144,72 @@ function HowItWorksPage() {
 
 function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [inquirySubmitted, setInquirySubmitted] = useState(false);
+  const [inquiryLoading, setInquiryLoading] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({
+    name: "",
+    email: "",
+    playerAge: "",
+    position: "",
+    goal: ""
+  });
+
+  const handleSignUp = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) alert(error.message);
+    else setUser(data.user);
+    setLoading(false);
+  };
+
+  const handleSignIn = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) alert(error.message);
+    else setUser(data.user);
+    setLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const handleSubmitInquiry = async () => {
+    if (!inquiryForm.name || !inquiryForm.email || !inquiryForm.position || !inquiryForm.goal) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setInquiryLoading(true);
+    const { error } = await inquiries.create({
+      name: inquiryForm.name,
+      email: inquiryForm.email,
+      player_age: inquiryForm.playerAge,
+      position: inquiryForm.position,
+      goal: inquiryForm.goal,
+      status: "new"
+    });
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      setInquirySubmitted(true);
+      setInquiryForm({ name: "", email: "", playerAge: "", position: "", goal: "" });
+      setTimeout(() => setInquirySubmitted(false), 5000);
+    }
+    setInquiryLoading(false);
+  };
 
   return (
     <>
@@ -1077,17 +1231,40 @@ function ContactPage() {
 
       <section className="section">
         <h2>Training Inquiry Form</h2>
-        {!sent ? (
+        {!inquirySubmitted ? (
           <div className="form">
-            <input placeholder="Player or parent name" />
-            <input placeholder="Email address" />
-            <input placeholder="Player age and position" />
-            <input placeholder="Main goal: shooting, dribbling, speed, confidence, etc." />
-            <button onClick={() => setSent(true)}>Send Training Inquiry</button>
+            <input
+              placeholder="Player or parent name"
+              value={inquiryForm.name}
+              onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
+            />
+            <input
+              placeholder="Email address"
+              value={inquiryForm.email}
+              onChange={(e) => setInquiryForm({...inquiryForm, email: e.target.value})}
+            />
+            <input
+              placeholder="Player age and position"
+              value={inquiryForm.playerAge}
+              onChange={(e) => setInquiryForm({...inquiryForm, playerAge: e.target.value})}
+            />
+            <input
+              placeholder="Main goal: shooting, dribbling, speed, confidence, etc."
+              value={inquiryForm.goal}
+              onChange={(e) => setInquiryForm({...inquiryForm, goal: e.target.value})}
+            />
+            <input
+              placeholder="Position: Striker, Winger, Defender, etc."
+              value={inquiryForm.position}
+              onChange={(e) => setInquiryForm({...inquiryForm, position: e.target.value})}
+            />
+            <button onClick={handleSubmitInquiry} disabled={inquiryLoading}>
+              {inquiryLoading ? "Sending..." : "Send Training Inquiry"}
+            </button>
           </div>
         ) : (
           <p className="success">
-            Thanks! Your training inquiry has been received. I’ll follow up with next steps.
+            Thanks! Your training inquiry has been received. I'll follow up with next steps.
           </p>
         )}
       </section>
@@ -1158,6 +1335,37 @@ function ContactPage() {
           </div>
         </div>
       </section>
+
+      <section className="section">
+        <h2>Account Access</h2>
+        {user ? (
+          <div>
+            <p>Welcome, {user.email}!</p>
+            <button onClick={handleSignOut}>Sign Out</button>
+          </div>
+        ) : (
+          <div className="form">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleSignIn} disabled={loading}>
+              Sign In
+            </button>
+            <button onClick={handleSignUp} disabled={loading}>
+              Sign Up
+            </button>
+          </div>
+        )}
+      </section>
     </>
   );
 }
@@ -1171,6 +1379,8 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </div>
   );
