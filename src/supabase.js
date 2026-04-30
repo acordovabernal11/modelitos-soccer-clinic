@@ -8,11 +8,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // ===== TRAINING INQUIRIES =====
 export const inquiries = {
   create: async (data) => {
-    const { data: result, error } = await supabase
+    const { error } = await supabase
       .from('training_inquiries')
       .insert([data])
-      .select()
-    return { data: result, error }
+    return { error }
   },
 
   getAll: async () => {
@@ -118,11 +117,10 @@ export const plans = {
 // ===== BOOKINGS =====
 export const bookings = {
   create: async (userId, data) => {
-    const { data: result, error } = await supabase
+    const { error } = await supabase
       .from('bookings')
       .insert([{ user_id: userId, ...data }])
-      .select()
-    return { data: result, error }
+    return { error }
   },
 
   getByUserId: async (userId) => {
@@ -137,7 +135,7 @@ export const bookings = {
   getAll: async () => {
     const { data, error } = await supabase
       .from('bookings')
-      .select('*, user_profiles(position, goals)')
+      .select('*')
       .order('session_date', { ascending: true })
     return { data, error }
   },

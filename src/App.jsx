@@ -3,33 +3,64 @@ import { Routes, Route, Link } from "react-router-dom";
 import { supabase, inquiries, plans } from "./supabase";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { BookingPage } from "./pages/BookingPage";
 import "./App.css";
 
 function Navbar() {
   const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
     });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <nav className="nav">
       <h2 className="logo">Modelitos Soccer Clinic</h2>
-      <div className="nav-links">
-        <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
-        <Link to="/how-it-works">How It Works</Link>
-        <Link to="/contact">Contact</Link>
-        {user && <Link to="/profile">My Profile</Link>}
-        {user && <Link to="/admin">Admin</Link>}
+
+      {/* Hamburger button — mobile only */}
+      <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+        <span className={`hamburger-line ${menuOpen ? "open" : ""}`} />
+        <span className={`hamburger-line ${menuOpen ? "open" : ""}`} />
+        <span className={`hamburger-line ${menuOpen ? "open" : ""}`} />
+      </button>
+
+      {/* Nav links */}
+      <div className={`nav-links ${menuOpen ? "nav-open" : ""}`}>
+        <Link to="/" onClick={closeMenu}>Home</Link>
+        <Link to="/about" onClick={closeMenu}>About</Link>
+        <Link to="/how-it-works" onClick={closeMenu}>How It Works</Link>
+        <Link to="/book" onClick={closeMenu}>Book</Link>
+        <Link to="/contact" onClick={closeMenu}>Contact</Link>
+        {user ? (
+          <>
+            <Link to="/profile" onClick={closeMenu}>My Profile</Link>
+            {user.email === "acordovabernal11@gmail.com" && <Link to="/admin" onClick={closeMenu}>Admin</Link>}
+          </>
+        ) : (
+          <Link to="/profile" onClick={closeMenu}>Sign In</Link>
+        )}
       </div>
     </nav>
   );
 }
 
+function usePageTitle(title) {
+  useEffect(() => {
+    document.title = `${title} — Modelitos Soccer Clinic`;
+  }, [title]);
+}
+
 function HomePage() {
+  usePageTitle("Home");
   const [submitted, setSubmitted] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -74,7 +105,7 @@ function HomePage() {
           </p>
 
           <div className="hero-buttons">
-            <Link to="/contact">
+            <Link to="/book">
               <button className="primary-btn">Book Training</button>
             </Link>
             <Link to="/how-it-works">
@@ -201,11 +232,72 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="section">
+        <h2>What Players & Parents Say</h2>
+        <p>Real feedback from players and families who have trained with Modelitos Soccer Clinic.</p>
+        <div className="feature-grid" style={{ marginTop: '30px' }}>
+          {[
+            { quote: "My son went from nervous on the ball to confident and aggressive in just a few sessions. The coaching is detailed and actually explains the why behind every drill.", name: "Parent of U14 Player", location: "West Grove, PA" },
+            { quote: "I've trained with a lot of coaches and this is the first time I felt like the sessions were built specifically for me. My first touch and decision-making improved fast.", name: "High School Midfielder", location: "Kennett Square, PA" },
+            { quote: "The AI training plan alone is worth it. I use it between sessions to keep working on my weak foot. I can already feel the difference in games.", name: "Club Player, U16", location: "Downingtown, PA" }
+          ].map(({ quote, name, location }) => (
+            <div key={name} style={{ background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '18px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <p style={{ color: '#334155', lineHeight: '1.8', fontSize: '15px', fontStyle: 'italic', margin: '0 0 20px' }}>"{quote}"</p>
+              <div>
+                <p style={{ margin: '0 0 2px', fontWeight: '700', color: '#1e3a8a', fontSize: '14px' }}>{name}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>{location}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know before booking your first session.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '28px' }}>
+          {[
+            { q: "What age groups do you train?", a: "Sessions are available for youth, middle school, high school, and motivated beginner players of all ages. Training is tailored to each player's level." },
+            { q: "What should my player bring?", a: "Cleats or turf shoes, shin guards, a ball if you have one, and water. Wear athletic clothing you can move freely in." },
+            { q: "Where do sessions take place?", a: "You can choose from 4 locations: Avon Grove Middle School (West Grove, PA), United Sports Complex in Downingtown, Nixon Park in Kennett Square, and Kirkwood Sports Complex in New Castle, DE." },
+            { q: "What if we need to cancel?", a: "Please cancel at least 24 hours in advance so the time slot can be opened for another player. Last-minute cancellations may still be charged." },
+            { q: "Do you train in bad weather?", a: "Light rain is usually fine depending on the location. If weather makes training unsafe or impossible, we'll reschedule at no extra cost." },
+            { q: "How do I know which training type to pick?", a: "1-on-1 is best for players who want focused personal attention. Small group works great for friends training together. Team training is for organized teams. Camps and clinics are multi-session group events." },
+            { q: "How is payment handled?", a: "Payment is due in cash at the start of each session at the field. Nothing is charged online when you book — it's just a request that I confirm." }
+          ].map(({ q, a }) => (
+            <FAQItem key={q} question={q} answer={a} />
+          ))}
+        </div>
+      </section>
     </>
   );
 }
 
+function FAQItem({ question, answer }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      style={{ border: '1px solid #bfdbfe', borderRadius: '12px', overflow: 'hidden', background: open ? '#f8fbff' : 'white' }}
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '12px' }}
+      >
+        <span style={{ fontWeight: '700', color: '#1e3a8a', fontSize: '15px' }}>{question}</span>
+        <span style={{ fontSize: '20px', color: '#2563eb', flexShrink: 0, transform: open ? 'rotate(45deg)' : 'none', transition: '0.2s' }}>+</span>
+      </button>
+      {open && (
+        <div style={{ padding: '0 22px 18px' }}>
+          <p style={{ margin: 0, color: '#334155', lineHeight: '1.7', fontSize: '15px' }}>{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AboutPage() {
+  usePageTitle("About");
   return (
     <section className="section">
       <h2>About Modelitos Soccer Clinic</h2>
@@ -236,6 +328,7 @@ function AboutPage() {
 }
 
 function HowItWorksPage() {
+  usePageTitle("How It Works");
   const [position, setPosition] = useState("Winger");
   const [goal, setGoal] = useState("Improve dribbling");
   const [customDetails, setCustomDetails] = useState("");
@@ -1143,6 +1236,7 @@ function HowItWorksPage() {
 }
 
 function ContactPage() {
+  usePageTitle("Contact");
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -1379,9 +1473,10 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/book" element={<BookingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </div>
   );
-}
+} 
