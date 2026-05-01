@@ -222,60 +222,70 @@ export function ProfilePage() {
   // Not logged in — show auth form
   if (!user) {
     return (
-      <section className="section">
-        <h2>{authMode === 'signin' ? 'Sign In to Your Account' : 'Create an Account'}</h2>
-        <p>
-          {authMode === 'signin'
-            ? 'Sign in to view your profile, track your goals, and access your saved training plans.'
-            : 'Create an account to build your player profile and track your training progress.'}
-        </p>
-
-        <div className="form">
-          <input
-            type="email"
-            placeholder="Email address"
-            value={authEmail}
-            onChange={(e) => setAuthEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={authPassword}
-            onChange={(e) => setAuthPassword(e.target.value)}
-          />
-          {authMode === 'signin' ? (
-            <>
-              <button onClick={handleSignIn} disabled={authLoading} className="primary-btn">
-                {authLoading ? 'Signing in...' : 'Sign In'}
-              </button>
-              <p style={{ textAlign: 'center', marginTop: '12px' }}>
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setAuthMode('signup')}
-                  style={{ background: 'none', border: 'none', color: 'var(--green)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                >
-                  Create one
-                </button>
-              </p>
-            </>
-          ) : (
-            <>
-              <button onClick={handleSignUp} disabled={authLoading} className="primary-btn">
-                {authLoading ? 'Creating account...' : 'Create Account'}
-              </button>
-              <p style={{ textAlign: 'center', marginTop: '12px' }}>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setAuthMode('signin')}
-                  style={{ background: 'none', border: 'none', color: 'var(--green)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                >
-                  Sign in
-                </button>
-              </p>
-            </>
-          )}
+      <div className="signin-layout">
+        <div className="signin-photo-panel">
+          <img src="/alexis-headstall.jpg" alt="Elite soccer training" />
+          <div className="signin-photo-overlay">
+            <h3>Train with Purpose</h3>
+            <p>Sign in to access your training plans, track your progress, and manage your bookings.</p>
+          </div>
         </div>
-      </section>
+
+        <div className="signin-form-panel">
+          <h2>{authMode === 'signin' ? 'Sign In' : 'Create Account'}</h2>
+          <p>
+            {authMode === 'signin'
+              ? 'Sign in to view your profile, track your goals, and access your saved training plans.'
+              : 'Create an account to build your player profile and track your training progress.'}
+          </p>
+
+          <div className="form">
+            <input
+              type="email"
+              placeholder="Email address"
+              value={authEmail}
+              onChange={(e) => setAuthEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
+            />
+            {authMode === 'signin' ? (
+              <>
+                <button onClick={handleSignIn} disabled={authLoading} className="primary-btn">
+                  {authLoading ? 'Signing in...' : 'Sign In'}
+                </button>
+                <p style={{ textAlign: 'center', marginTop: '12px' }}>
+                  Don't have an account?{' '}
+                  <button
+                    onClick={() => setAuthMode('signup')}
+                    style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                  >
+                    Create one
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <button onClick={handleSignUp} disabled={authLoading} className="primary-btn">
+                  {authLoading ? 'Creating account...' : 'Create Account'}
+                </button>
+                <p style={{ textAlign: 'center', marginTop: '12px' }}>
+                  Already have an account?{' '}
+                  <button
+                    onClick={() => setAuthMode('signin')}
+                    style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 

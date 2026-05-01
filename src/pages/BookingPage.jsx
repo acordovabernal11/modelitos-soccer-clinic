@@ -193,8 +193,7 @@ export function BookingPage() {
       goals: form.goals,
       num_players: form.numPlayers,
       preferred_time: form.preferredTime,
-      notes: form.notes,
-      location: selectedLocation ? `${selectedLocation.name} — ${selectedLocation.address}` : ''
+      notes: form.notes
     });
 
     if (error) {
@@ -296,12 +295,15 @@ export function BookingPage() {
 
   return (
     <>
+      <div className="booking-hero">
+        <div className="booking-hero-content">
+          <p className="booking-eyebrow">Elite Soccer Coaching · PA &amp; DE</p>
+          <h1>Book a Training Session</h1>
+          <p>Choose your training type, pick a location, and fill in your details. I'll confirm within 24 hours — payment is due in cash at the field.</p>
+        </div>
+      </div>
+
       <section className="section" style={{ paddingBottom: '24px' }}>
-        <h2 style={{ marginBottom: '8px' }}>Book a Training Session</h2>
-        <p style={{ color: '#475569', marginBottom: '24px' }}>
-          Fill out the booking request below. I'll confirm your session within 24 hours.
-          Payment is due in cash at the field — nothing is collected online.
-        </p>
         <div style={{ display: 'flex', gap: '8px' }}>
           {steps.map((label, i) => (
             <div key={label} style={{ flex: 1 }}>

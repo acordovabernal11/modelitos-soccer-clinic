@@ -208,6 +208,7 @@ function HomePage() {
 
         <div className="experience-grid">
           <div className="experience-card">
+            <img src="/alexis-pennstate-night.jpg" alt="College soccer" className="experience-card-img" />
             <h3>College-Level Background</h3>
             <p>
               Played at the college level with the discipline, tactical awareness, and
@@ -216,6 +217,7 @@ function HomePage() {
           </div>
 
           <div className="experience-card">
+            <img src="/alexis-spain-action.jpg" alt="Professional play in Spain" className="experience-card-img" />
             <h3>Mexico & Spain Professional Playing Experience</h3>
             <p>
               Played in competitive environments across Mexico and Spain, gaining technical
@@ -224,6 +226,7 @@ function HomePage() {
           </div>
 
           <div className="experience-card">
+            <img src="/photo3.jpg" alt="Player training session" className="experience-card-img" />
             <h3>Player-Focused Development</h3>
             <p>
               Each session is tailored to your position, goals, and current level so every training
@@ -1076,6 +1079,12 @@ function HowItWorksPage() {
             <p>Players receive clear feedback and a next-step plan to keep improving.</p>
           </div>
         </div>
+
+        <div className="hiw-action-photos">
+          <img src="/2A9A9301.JPG" alt="Soccer training session" />
+          <img src="/mexico-training.jpg" alt="Training in action" />
+          <img src="/alexis-pennstate-field.jpg" alt="Penn State soccer field" />
+        </div>
       </section>
 
       <section className="section">
@@ -1307,6 +1316,17 @@ function ContactPage() {
 
   return (
     <>
+      <div
+        className="booking-hero"
+        style={{ backgroundImage: 'linear-gradient(to bottom, rgba(10,22,54,0.52), rgba(10,22,54,0.70)), url("/alexis-spain-run.jpg")' }}
+      >
+        <div className="booking-hero-content">
+          <p className="booking-eyebrow">West Grove, PA · acordovabernal11@gmail.com</p>
+          <h1>Get in Touch</h1>
+          <p>Ready to start training? Fill out the inquiry form below and I'll follow up with the best training option for your player.</p>
+        </div>
+      </div>
+
       <section className="section">
         <h2>Contact Modelitos Soccer Clinic</h2>
         <p>
@@ -1479,4 +1499,4 @@ export default function App() {
       </Routes>
     </div>
   );
-} 
+}

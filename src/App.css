@@ -55,8 +55,8 @@ html {
   text-align: center;
   padding: 150px 20px 120px 20px;
   background-image:
-    linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.9)),
-    url("https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=2070&auto=format&fit=crop");
+    linear-gradient(rgba(255,255,255,0.80), rgba(255,255,255,0.90)),
+    url("/hero-bg.jpg");
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid #bfdbfe;
@@ -231,6 +231,15 @@ html {
 .experience-card p {
   color: #334155;
   line-height: 1.8;
+}
+
+.experience-card-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  display: block;
 }
 
 .feature-card {
@@ -563,6 +572,147 @@ iframe {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
+/* SIGN IN PAGE — SPLIT LAYOUT */
+.signin-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1100px;
+  margin: 60px auto;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  background: white;
+  min-height: 580px;
+}
+
+.signin-photo-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.signin-photo-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.signin-photo-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px;
+  background: linear-gradient(to top, rgba(10, 22, 54, 0.85), transparent);
+}
+
+.signin-photo-overlay h3 {
+  color: white;
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.signin-photo-overlay p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.signin-form-panel {
+  padding: 56px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.signin-form-panel h2 {
+  color: #1e3a8a;
+  font-size: 30px;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.signin-form-panel > p {
+  color: #475569;
+  font-size: 15px;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.signin-form-panel .form {
+  margin-top: 0;
+}
+
+/* BOOKING PAGE HERO */
+.booking-hero {
+  background-image:
+    linear-gradient(to bottom, rgba(10, 22, 54, 0.55), rgba(10, 22, 54, 0.72)),
+    url("/alexis-pennstate-field.jpg");
+  background-size: cover;
+  background-position: center 30%;
+  padding: 110px 40px 90px;
+  text-align: center;
+}
+
+.booking-hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.booking-hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  color: white;
+  margin: 14px 0 18px;
+  line-height: 1.1;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
+}
+
+.booking-hero p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.booking-eyebrow {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* HOW IT WORKS — ACTION PHOTOS */
+.hiw-action-photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.hiw-action-photos img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hiw-action-photos img:hover {
+  transform: scale(1.025);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+}
+
 /* HAMBURGER MENU */
 .hamburger {
   display: none;
@@ -611,8 +761,30 @@ iframe {
   .training-grid,
   .pricing-grid,
   .timeline,
-  .experience-grid {
+  .experience-grid,
+  .hiw-action-photos {
     grid-template-columns: 1fr;
+  }
+
+  .booking-hero {
+    padding: 80px 20px 60px;
+  }
+
+  .booking-hero h1 {
+    font-size: 32px;
+  }
+
+  .signin-layout {
+    grid-template-columns: 1fr;
+    margin: 25px 16px;
+  }
+
+  .signin-photo-panel {
+    height: 240px;
+  }
+
+  .signin-form-panel {
+    padding: 36px 24px;
   }
 
   .hamburger {
