@@ -195,7 +195,8 @@ export function BookingPage() {
       goals: form.goals,
       num_players: form.numPlayers,
       preferred_time: form.preferredTime,
-      notes: form.notes
+      notes: form.notes,
+      location: selectedLocation ? `${selectedLocation.name} — ${selectedLocation.address}` : ''
     });
 
     if (error) {
@@ -217,6 +218,17 @@ export function BookingPage() {
         client_email: form.clientEmail,
         notes: form.notes || 'None',
         location: selectedLocation ? `${selectedLocation.name} — ${selectedLocation.address}` : 'Not specified'
+      }, EMAILJS_PUBLIC_KEY).catch(() => {});
+
+      // Send confirmation email to player
+      emailjs.send(EMAILJS_SERVICE_ID, 'template_booking_confirm', {
+        player_name: form.playerName,
+        session_type: selectedType.name,
+        preferred_date: new Date(form.preferredDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+        preferred_time: form.preferredTime || 'Flexible',
+        total: `$${calcPrice()}`,
+        location: selectedLocation ? `${selectedLocation.name} — ${selectedLocation.address}` : 'To be confirmed',
+        to_email: form.clientEmail
       }, EMAILJS_PUBLIC_KEY).catch(() => {});
 
       setSubmittedBooking({ ...form, type: selectedType, total: calcPrice() });

@@ -1484,6 +1484,40 @@ function ContactPage() {
   );
 }
 
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="footer-inner">
+        <div className="footer-brand">
+          <h3>Modelitos Soccer Clinic</h3>
+          <p>
+            Elite soccer training for players who want to stand out.
+            College-level experience and professional play in Mexico and Spain.
+            West Grove, PA &amp; surrounding areas.
+          </p>
+        </div>
+        <div className="footer-col">
+          <h4>Pages</h4>
+          <Link to="/">Home</Link>
+          <Link to="/about">About</Link>
+          <Link to="/how-it-works">How It Works</Link>
+          <Link to="/book">Book a Session</Link>
+          <Link to="/contact">Contact &amp; Pricing</Link>
+        </div>
+        <div className="footer-col">
+          <h4>Contact</h4>
+          <p>acordovabernal11@gmail.com</p>
+          <p>West Grove, PA</p>
+          <p>Training locations in PA &amp; DE</p>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <p>© {new Date().getFullYear()} Modelitos Soccer Clinic. All rights reserved.</p>
+      </div>
+    </footer>
+  );
+}
+
 function FeedbackPage() {
   usePageTitle("Session Feedback");
   const [searchParams] = useSearchParams();
@@ -1639,6 +1673,7 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/feedback" element={<FeedbackPage />} />
       </Routes>
+      <Footer />
     </div>
   );
 }

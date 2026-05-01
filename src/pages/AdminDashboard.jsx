@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
-import { supabase, bookings } from '../supabase';
+import { supabase, bookings, feedback as feedbackApi } from '../supabase';
 
 const EMAILJS_SERVICE_ID = 'service_4kbanym';
 const EMAILJS_FEEDBACK_TEMPLATE_ID = 'template_feedback';
@@ -209,8 +209,10 @@ function BookingCard({ booking, onStatusChange, onDelete }) {
 export function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
+  const [feedbackData, setFeedbackData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [activeView, setActiveView] = useState('bookings');
 
   useEffect(() => {
     loadData();
@@ -220,10 +222,12 @@ export function AdminDashboard() {
     setLoading(true);
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     setUser(currentUser);
-    const { data, error } = await bookings.getAll();
-    console.log("Bookings data:", data);
-    console.log("Bookings error:", error);
-    if (data) setAllBookings(data);
+    const [bookingsResult, feedbackResult] = await Promise.all([
+      bookings.getAll(),
+      feedbackApi.getAll()
+    ]);
+    if (bookingsResult.data) setAllBookings(bookingsResult.data);
+    if (feedbackResult.data) setFeedbackData(feedbackResult.data);
     setLoading(false);
   };
 
@@ -243,6 +247,9 @@ export function AdminDashboard() {
 
   const filtered = filterStatus === 'all' ? allBookings : allBookings.filter(b => b.status === filterStatus);
   const pendingCount = allBookings.filter(b => b.status === 'pending').length;
+  const avgRating = feedbackData.length
+    ? (feedbackData.reduce((sum, f) => sum + (f.rating || 0), 0) / feedbackData.length).toFixed(1)
+    : null;
 
   if (loading) return <div className="section"><p>Loading...</p></div>;
   if (!user) return <div className="section"><p>Please sign in to access the admin dashboard.</p></div>;
@@ -253,55 +260,146 @@ export function AdminDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2 style={{ marginBottom: '6px' }}>Admin Dashboard</h2>
-            <p style={{ margin: 0, color: '#475569' }}>Manage all booking requests and update session status.</p>
+            <p style={{ margin: 0, color: '#475569' }}>Manage bookings and review player feedback.</p>
           </div>
-          {pendingCount > 0 && (
-            <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '12px', padding: '10px 18px', textAlign: 'center' }}>
-              <p style={{ margin: '0 0 2px', fontSize: '24px', fontWeight: '800', color: '#92400e' }}>{pendingCount}</p>
-              <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: '#92400e' }}>PENDING</p>
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {pendingCount > 0 && (
+              <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '12px', padding: '10px 18px', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 2px', fontSize: '24px', fontWeight: '800', color: '#92400e' }}>{pendingCount}</p>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: '#92400e' }}>PENDING</p>
+              </div>
+            )}
+            {avgRating && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '12px', padding: '10px 18px', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 2px', fontSize: '24px', fontWeight: '800', color: '#15803d' }}>{avgRating} ⭐</p>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: '#15803d' }}>AVG RATING</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Summary counts */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '20px' }}>
-          {['all', 'pending', 'confirmed', 'completed', 'declined', 'cancelled'].map((s) => {
-            const count = s === 'all' ? allBookings.length : allBookings.filter(b => b.status === s).length;
-            return (
-              <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                style={{
-                  padding: '8px 16px', borderRadius: '999px', border: '1px solid',
-                  borderColor: filterStatus === s ? '#2563eb' : '#e2e8f0',
-                  background: filterStatus === s ? '#eff6ff' : 'white',
-                  color: filterStatus === s ? '#1d4ed8' : '#475569',
-                  fontWeight: '700', cursor: 'pointer', fontSize: '13px', textTransform: 'capitalize'
-                }}
-              >
-                {s === 'all' ? 'All' : s} ({count})
-              </button>
-            );
-          })}
+        {/* View tabs */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '0' }}>
+          {[
+            { key: 'bookings', label: `Bookings (${allBookings.length})` },
+            { key: 'feedback', label: `Feedback (${feedbackData.length})` }
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveView(key)}
+              style={{
+                padding: '10px 20px', background: 'none', border: 'none', cursor: 'pointer',
+                fontWeight: '700', fontSize: '14px',
+                color: activeView === key ? '#2563eb' : '#94a3b8',
+                borderBottom: activeView === key ? '2px solid #2563eb' : '2px solid transparent',
+                marginBottom: '-2px', transition: '0.15s ease'
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
-      </section>
 
-      <section className="section" style={{ paddingTop: '24px' }}>
-        {filtered.length === 0 ? (
-          <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 0' }}>No bookings found for this filter.</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {filtered.map(booking => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                onStatusChange={handleStatusChange}
-                onDelete={handleDelete}
-              />
-            ))}
+        {/* Booking status filters */}
+        {activeView === 'bookings' && (
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '20px' }}>
+            {['all', 'pending', 'confirmed', 'completed', 'declined', 'cancelled'].map((s) => {
+              const count = s === 'all' ? allBookings.length : allBookings.filter(b => b.status === s).length;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  style={{
+                    padding: '8px 16px', borderRadius: '999px', border: '1px solid',
+                    borderColor: filterStatus === s ? '#2563eb' : '#e2e8f0',
+                    background: filterStatus === s ? '#eff6ff' : 'white',
+                    color: filterStatus === s ? '#1d4ed8' : '#475569',
+                    fontWeight: '700', cursor: 'pointer', fontSize: '13px', textTransform: 'capitalize'
+                  }}
+                >
+                  {s === 'all' ? 'All' : s} ({count})
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
+
+      {/* Bookings view */}
+      {activeView === 'bookings' && (
+        <section className="section" style={{ paddingTop: '24px' }}>
+          {filtered.length === 0 ? (
+            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 0' }}>No bookings found for this filter.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {filtered.map(booking => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  onStatusChange={handleStatusChange}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Feedback view */}
+      {activeView === 'feedback' && (
+        <section className="section" style={{ paddingTop: '24px' }}>
+          {feedbackData.length === 0 ? (
+            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 0' }}>No feedback received yet. Mark a booking as Completed and send a feedback request.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {feedbackData.map((f) => (
+                <div key={f.id} style={{ background: 'white', border: '1px solid #bfdbfe', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <p style={{ margin: '0 0 4px', fontWeight: '700', color: '#0f172a', fontSize: '15px' }}>{f.player_name}</p>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                        {f.session_type} &nbsp;·&nbsp; {new Date(f.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span key={n} style={{ fontSize: '22px', opacity: n <= f.rating ? 1 : 0.2 }}>⭐</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {f.would_recommend !== null && (
+                    <span style={{
+                      display: 'inline-block', marginBottom: '16px',
+                      background: f.would_recommend ? '#d1fae5' : '#fee2e2',
+                      color: f.would_recommend ? '#065f46' : '#991b1b',
+                      border: `1px solid ${f.would_recommend ? '#6ee7b7' : '#fca5a5'}`,
+                      padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '700'
+                    }}>
+                      {f.would_recommend ? '👍 Would Recommend' : '👎 Would Not Recommend'}
+                    </span>
+                  )}
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    {f.what_improved && (
+                      <div>
+                        <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em' }}>What Improved</p>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#334155', lineHeight: '1.6' }}>{f.what_improved}</p>
+                      </div>
+                    )}
+                    {f.next_goals && (
+                      <div>
+                        <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Next Focus</p>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#334155', lineHeight: '1.6' }}>{f.next_goals}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </>
   );
 }
