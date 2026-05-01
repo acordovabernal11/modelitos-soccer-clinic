@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import { supabase, bookings } from '../supabase';
+
+const EMAILJS_SERVICE_ID = 'service_4kbanym';
+const EMAILJS_FEEDBACK_TEMPLATE_ID = 'template_feedback';
+const EMAILJS_PUBLIC_KEY = '1IFdc2nRFvanhLDbW';
 
 const STATUS_STYLES = {
   pending:   { bg: '#fef3c7', color: '#92400e', border: '#fcd34d', label: 'Pending' },
@@ -22,11 +27,39 @@ function StatusBadge({ status }) {
 function BookingCard({ booking, onStatusChange, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [sendingFeedback, setSendingFeedback] = useState(false);
 
   const changeStatus = async (newStatus) => {
     setUpdating(true);
     await onStatusChange(booking.id, newStatus);
     setUpdating(false);
+  };
+
+  const handleRequestFeedback = async () => {
+    if (!booking.client_email) {
+      alert('No email on file for this booking.');
+      return;
+    }
+    setSendingFeedback(true);
+    const feedbackUrl = `${window.location.origin}/feedback?name=${encodeURIComponent(booking.player_name || 'Player')}&session=${encodeURIComponent(booking.session_type || 'Training Session')}&booking_id=${booking.id}`;
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_FEEDBACK_TEMPLATE_ID,
+        {
+          player_name: booking.player_name || 'Player',
+          session_type: booking.session_type,
+          feedback_url: feedbackUrl,
+          to_email: booking.client_email
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setFeedbackSent(true);
+    } catch {
+      alert('Could not send feedback email. Make sure the "template_feedback" template exists in your EmailJS dashboard.');
+    }
+    setSendingFeedback(false);
   };
 
   const price = booking.price_cents ? `$${(booking.price_cents / 100).toFixed(0)}` : 'N/A';
@@ -77,6 +110,29 @@ function BookingCard({ booking, onStatusChange, onDelete }) {
           >
             ✕ Decline
           </button>
+        </div>
+      )}
+
+      {/* Request feedback — always visible for completed */}
+      {booking.status === 'completed' && (
+        <div style={{ padding: '0 22px 16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            onClick={handleRequestFeedback}
+            disabled={sendingFeedback || feedbackSent}
+            style={{
+              background: feedbackSent ? '#d1fae5' : '#2563eb',
+              color: feedbackSent ? '#065f46' : 'white',
+              border: 'none', borderRadius: '8px', padding: '8px 18px',
+              fontWeight: '700', cursor: feedbackSent ? 'default' : 'pointer', fontSize: '14px'
+            }}
+          >
+            {feedbackSent ? '✓ Feedback Request Sent' : sendingFeedback ? 'Sending...' : '✉ Request Feedback'}
+          </button>
+          {feedbackSent && (
+            <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+              Sent to {booking.client_email}
+            </p>
+          )}
         </div>
       )}
 

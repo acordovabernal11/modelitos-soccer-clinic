@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-import { supabase, inquiries, plans } from "./supabase";
+import { Routes, Route, Link, useSearchParams } from "react-router-dom";
+import { supabase, inquiries, plans, feedback } from "./supabase";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { BookingPage } from "./pages/BookingPage";
@@ -1484,6 +1484,147 @@ function ContactPage() {
   );
 }
 
+function FeedbackPage() {
+  usePageTitle("Session Feedback");
+  const [searchParams] = useSearchParams();
+  const playerName = searchParams.get('name') || 'Player';
+  const sessionType = searchParams.get('session') || 'Training Session';
+  const bookingId = searchParams.get('booking_id') || null;
+
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [improved, setImproved] = useState('');
+  const [nextGoals, setNextGoals] = useState('');
+  const [recommend, setRecommend] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const ratingLabels = ['', 'Needs improvement', 'Below expectations', 'Good session', 'Great session', 'Outstanding!'];
+
+  const handleSubmit = async () => {
+    if (!rating) { alert('Please select a star rating.'); return; }
+    setLoading(true);
+    const { error } = await feedback.create({
+      booking_id: bookingId,
+      player_name: playerName,
+      session_type: sessionType,
+      rating,
+      what_improved: improved,
+      next_goals: nextGoals,
+      would_recommend: recommend
+    });
+    if (error) {
+      alert('Error submitting: ' + error.message);
+    } else {
+      setSubmitted(true);
+    }
+    setLoading(false);
+  };
+
+  if (submitted) {
+    return (
+      <section className="section" style={{ maxWidth: '560px', textAlign: 'center' }}>
+        <div style={{ fontSize: '60px', marginBottom: '16px' }}>⭐</div>
+        <h2>Thanks for the feedback, {playerName}!</h2>
+        <p>Your response helps make every session better. See you on the field.</p>
+        <Link to="/"><button className="primary-btn" style={{ marginTop: '16px' }}>Back to Home</button></Link>
+      </section>
+    );
+  }
+
+  return (
+    <section className="section" style={{ maxWidth: '640px' }}>
+      <p className="eyebrow">Post-Session Feedback</p>
+      <h2 style={{ marginTop: '12px' }}>How was your {sessionType}?</h2>
+      <p>Hi {playerName} — thanks for training with Modelitos Soccer Clinic. This takes less than a minute.</p>
+
+      <div style={{ marginTop: '32px', marginBottom: '32px' }}>
+        <p style={{ fontWeight: '700', color: '#1e3a8a', marginBottom: '14px', fontSize: '16px' }}>Overall Rating</p>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              onClick={() => setRating(n)}
+              onMouseEnter={() => setHoverRating(n)}
+              onMouseLeave={() => setHoverRating(0)}
+              style={{
+                fontSize: '40px', background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                opacity: (hoverRating || rating) >= n ? 1 : 0.25,
+                transition: '0.15s ease', transform: (hoverRating || rating) >= n ? 'scale(1.1)' : 'scale(1)'
+              }}
+            >⭐</button>
+          ))}
+        </div>
+        {rating > 0 && (
+          <p style={{ marginTop: '10px', color: '#2563eb', fontWeight: '700', fontSize: '15px' }}>
+            {ratingLabels[rating]}
+          </p>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        <div>
+          <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '8px' }}>
+            What felt like it improved during the session?
+          </label>
+          <textarea
+            className="textarea"
+            placeholder="e.g., My first touch felt sharper, more confident in 1v1 situations..."
+            value={improved}
+            onChange={(e) => setImproved(e.target.value)}
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '8px' }}>
+            What would you like to focus on in your next session?
+          </label>
+          <textarea
+            className="textarea"
+            placeholder="e.g., Shooting from outside the box, weak foot work..."
+            value={nextGoals}
+            onChange={(e) => setNextGoals(e.target.value)}
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <p style={{ fontWeight: '700', color: '#1e3a8a', margin: '0 0 12px' }}>
+            Would you recommend Modelitos Soccer Clinic?
+          </p>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {[true, false].map((val) => (
+              <button
+                key={String(val)}
+                onClick={() => setRecommend(val)}
+                style={{
+                  padding: '10px 28px', borderRadius: '10px', fontWeight: '700', fontSize: '15px',
+                  cursor: 'pointer', border: '2px solid',
+                  borderColor: recommend === val ? '#2563eb' : '#e2e8f0',
+                  background: recommend === val ? '#eff6ff' : 'white',
+                  color: recommend === val ? '#1d4ed8' : '#475569'
+                }}
+              >
+                {val ? '👍 Yes' : '👎 No'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <button
+        className="primary-btn"
+        style={{ marginTop: '36px', width: '100%', padding: '16px', fontSize: '16px' }}
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? 'Submitting...' : 'Submit Feedback'}
+      </button>
+    </section>
+  );
+}
+
 export default function App() {
   return (
     <div className="container">
@@ -1496,6 +1637,7 @@ export default function App() {
         <Route path="/book" element={<BookingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
       </Routes>
     </div>
   );

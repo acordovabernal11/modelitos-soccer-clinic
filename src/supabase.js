@@ -114,6 +114,24 @@ export const plans = {
   }
 }
 
+// ===== FEEDBACK =====
+export const feedback = {
+  create: async (data) => {
+    const { error } = await supabase
+      .from('feedback')
+      .insert([data])
+    return { error }
+  },
+
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  }
+}
+
 // ===== BOOKINGS =====
 export const bookings = {
   create: async (userId, data) => {
