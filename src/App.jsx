@@ -1484,6 +1484,62 @@ function ContactPage() {
   );
 }
 
+function ResetPasswordPage() {
+  usePageTitle("Reset Password");
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleReset = async () => {
+    if (!password.trim()) { alert('Please enter a new password.'); return; }
+    if (password !== confirm) { alert('Passwords do not match.'); return; }
+    if (password.length < 6) { alert('Password must be at least 6 characters.'); return; }
+    setLoading(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) alert(error.message);
+    else setDone(true);
+    setLoading(false);
+  };
+
+  if (done) {
+    return (
+      <section className="section" style={{ maxWidth: '480px', textAlign: 'center' }}>
+        <div style={{ fontSize: '56px', marginBottom: '16px' }}>✅</div>
+        <h2>Password Updated!</h2>
+        <p>Your password has been successfully changed. You can now sign in.</p>
+        <Link to="/profile">
+          <button className="primary-btn" style={{ marginTop: '16px' }}>Go to Sign In</button>
+        </Link>
+      </section>
+    );
+  }
+
+  return (
+    <section className="section" style={{ maxWidth: '480px' }}>
+      <h2>Set New Password</h2>
+      <p>Enter a new password for your account. Must be at least 6 characters.</p>
+      <div className="form">
+        <input
+          type="password"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Confirm new password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+        />
+        <button onClick={handleReset} disabled={loading} className="primary-btn">
+          {loading ? 'Updating...' : 'Update Password'}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer className="footer">
@@ -1672,6 +1728,7 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
       <Footer />
     </div>

@@ -79,7 +79,8 @@ export function ProfilePage() {
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [authMode, setAuthMode] = useState('signin'); // 'signin' or 'signup'
+  const [authMode, setAuthMode] = useState('signin'); // 'signin', 'signup', 'forgot'
+  const [forgotSent, setForgotSent] = useState(false);
 
   const [formData, setFormData] = useState({
     position: '',
@@ -171,6 +172,17 @@ export function ProfilePage() {
     setAuthLoading(false);
   };
 
+  const handleForgotPassword = async () => {
+    if (!authEmail.trim()) { alert('Please enter your email address.'); return; }
+    setAuthLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(authEmail, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
+    if (error) alert(error.message);
+    else setForgotSent(true);
+    setAuthLoading(false);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -232,58 +244,98 @@ export function ProfilePage() {
         </div>
 
         <div className="signin-form-panel">
-          <h2>{authMode === 'signin' ? 'Sign In' : 'Create Account'}</h2>
+          <h2>
+            {authMode === 'signin' ? 'Sign In' : authMode === 'signup' ? 'Create Account' : 'Reset Password'}
+          </h2>
           <p>
             {authMode === 'signin'
               ? 'Sign in to view your profile, track your goals, and access your saved training plans.'
-              : 'Create an account to build your player profile and track your training progress.'}
+              : authMode === 'signup'
+              ? 'Create an account to build your player profile and track your training progress.'
+              : 'Enter your email and we\'ll send you a link to reset your password.'}
           </p>
 
-          <div className="form">
-            <input
-              type="email"
-              placeholder="Email address"
-              value={authEmail}
-              onChange={(e) => setAuthEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={authPassword}
-              onChange={(e) => setAuthPassword(e.target.value)}
-            />
-            {authMode === 'signin' ? (
-              <>
-                <button onClick={handleSignIn} disabled={authLoading} className="primary-btn">
-                  {authLoading ? 'Signing in...' : 'Sign In'}
-                </button>
-                <p style={{ textAlign: 'center', marginTop: '12px' }}>
-                  Don't have an account?{' '}
-                  <button
-                    onClick={() => setAuthMode('signup')}
-                    style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                  >
-                    Create one
+          {authMode === 'forgot' ? (
+            <div className="form">
+              {forgotSent ? (
+                <p className="success">Check your email for a password reset link.</p>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                  />
+                  <button onClick={handleForgotPassword} disabled={authLoading} className="primary-btn">
+                    {authLoading ? 'Sending...' : 'Send Reset Email'}
                   </button>
-                </p>
-              </>
-            ) : (
-              <>
-                <button onClick={handleSignUp} disabled={authLoading} className="primary-btn">
-                  {authLoading ? 'Creating account...' : 'Create Account'}
+                </>
+              )}
+              <p style={{ textAlign: 'center', marginTop: '12px' }}>
+                <button
+                  onClick={() => { setAuthMode('signin'); setForgotSent(false); }}
+                  style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                >
+                  Back to Sign In
                 </button>
-                <p style={{ textAlign: 'center', marginTop: '12px' }}>
-                  Already have an account?{' '}
-                  <button
-                    onClick={() => setAuthMode('signin')}
-                    style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                  >
-                    Sign in
+              </p>
+            </div>
+          ) : (
+            <div className="form">
+              <input
+                type="email"
+                placeholder="Email address"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+              />
+              {authMode === 'signin' ? (
+                <>
+                  <button onClick={handleSignIn} disabled={authLoading} className="primary-btn">
+                    {authLoading ? 'Signing in...' : 'Sign In'}
                   </button>
-                </p>
-              </>
-            )}
-          </div>
+                  <p style={{ textAlign: 'center', marginTop: '8px' }}>
+                    <button
+                      onClick={() => setAuthMode('forgot')}
+                      style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: '14px' }}
+                    >
+                      Forgot password?
+                    </button>
+                  </p>
+                  <p style={{ textAlign: 'center', marginTop: '4px' }}>
+                    Don't have an account?{' '}
+                    <button
+                      onClick={() => setAuthMode('signup')}
+                      style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                    >
+                      Create one
+                    </button>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <button onClick={handleSignUp} disabled={authLoading} className="primary-btn">
+                    {authLoading ? 'Creating account...' : 'Create Account'}
+                  </button>
+                  <p style={{ textAlign: 'center', marginTop: '12px' }}>
+                    Already have an account?{' '}
+                    <button
+                      onClick={() => setAuthMode('signin')}
+                      style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                    >
+                      Sign in
+                    </button>
+                  </p>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
