@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase, profiles, plans, bookings as bookingsApi } from '../supabase';
 
 function SavedPlanCard({ plan, onDelete }) {
@@ -437,12 +438,12 @@ export function ProfilePage() {
       <section className="section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
           <h2 style={{ margin: 0 }}>My Bookings</h2>
-          <a href="/book">
+          <Link to="/book">
             <button className="primary-btn" style={{ margin: 0 }}>+ Book a Session</button>
-          </a>
+          </Link>
         </div>
         {savedBookings.length === 0 ? (
-          <p>No bookings yet. <a href="/book" style={{ color: '#2563eb', fontWeight: '700' }}>Book your first session</a> to get started.</p>
+          <p>No bookings yet. <Link to="/book" style={{ color: '#2563eb', fontWeight: '700' }}>Book your first session</Link> to get started.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {savedBookings.map((b) => {
