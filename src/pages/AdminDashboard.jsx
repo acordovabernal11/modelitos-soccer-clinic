@@ -146,6 +146,7 @@ function BookingCard({ booking, onStatusChange, onDelete }) {
               ['Position', booking.position],
               ['Skill Level', booking.skill_level],
               ['Contact Email', booking.client_email],
+              ['Phone Number', booking.phone],
               ['Training Type', booking.session_type],
               ['Date Requested', date],
               ['Preferred Time', booking.preferred_time || 'Flexible'],

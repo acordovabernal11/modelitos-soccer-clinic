@@ -147,6 +147,7 @@ export function BookingPage() {
   const [form, setForm] = useState({
     playerName: '',
     clientEmail: '',
+    phone: '',
     playerAge: '',
     position: '',
     skillLevel: 'intermediate',
@@ -187,6 +188,7 @@ export function BookingPage() {
       status: 'pending',
       player_name: form.playerName,
       client_email: form.clientEmail,
+      phone: form.phone,
       player_age: form.playerAge,
       position: form.position,
       skill_level: form.skillLevel,
@@ -203,6 +205,7 @@ export function BookingPage() {
       emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         training_type: selectedType.name,
         player_name: form.playerName,
+        phone: form.phone,
         player_age: form.playerAge,
         position: form.position,
         skill_level: form.skillLevel,
@@ -240,6 +243,7 @@ export function BookingPage() {
   const goToStep4 = () => {
     const missing = [];
     if (!form.playerName.trim()) missing.push('Player / Parent Name');
+    if (!form.phone.trim()) missing.push('Phone Number');
     if (!form.playerAge.trim()) missing.push('Player Age');
     if (!form.position) missing.push('Position');
     if (!form.goals.trim()) missing.push('Session Goals');
@@ -510,6 +514,18 @@ export function BookingPage() {
                 onChange={(e) => updateForm('clientEmail', e.target.value)}
               />
               <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>I'll use this to confirm your booking.</p>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>Phone Number <span style={{ color: '#dc2626' }}>*</span></label>
+              <input
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#0f172a' }}
+                type="tel"
+                placeholder="e.g., (610) 555-1234"
+                value={form.phone}
+                onChange={(e) => updateForm('phone', e.target.value)}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>I'll use this to follow up and confirm session details.</p>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
