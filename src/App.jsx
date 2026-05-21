@@ -4,7 +4,12 @@ import { supabase, inquiries, plans, feedback } from "./supabase";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { BookingPage } from "./pages/BookingPage";
+import emailjs from "@emailjs/browser";
 import "./App.css";
+
+const EMAILJS_SERVICE_ID = "service_4kbanym";
+const EMAILJS_WAITLIST_TEMPLATE_ID = "template_1misot7";
+const EMAILJS_PUBLIC_KEY = "1IFdc2nRFvanhLDbW";
 
 function Navbar() {
   const [user, setUser] = useState(null);
@@ -85,6 +90,22 @@ function HomePage() {
     if (error) {
       alert("Error: " + error.message);
     } else {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_WAITLIST_TEMPLATE_ID, {
+        training_type: "Waitlist Signup",
+        player_name: name.trim(),
+        client_email: email.trim(),
+        notes: "New waitlist signup from homepage",
+        phone: "N/A",
+        player_age: "N/A",
+        position: "N/A",
+        skill_level: "N/A",
+        goals: "N/A",
+        preferred_date: new Date().toLocaleDateString(),
+        preferred_time: "N/A",
+        num_players: "1",
+        total: "N/A",
+        location: "N/A"
+      }, EMAILJS_PUBLIC_KEY).catch(() => {});
       setSubmitted(true);
       setName("");
       setEmail("");
@@ -172,30 +193,15 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section feature-summary-section">
-        <h2>Feature Summary</h2>
+      <section className="section cta-account-section">
+        <h2>Create a Free Account</h2>
         <p>
-          This app helps players discover better training through position-specific plans,
-          clear weekly progress, and experience-backed insights.
+          Sign up to save your AI training plans, track your booked sessions,
+          and log your progress — all in one place.
         </p>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>Interactive AI Plan</h3>
-            <p>Users choose their position and goal, then generate a customized weekly training plan.</p>
-          </div>
-          <div className="feature-card">
-            <h3>Real Player Experience</h3>
-            <p>Content is backed by college-level play and professional experience in Mexico and Spain.</p>
-          </div>
-          <div className="feature-card">
-            <h3>Clear Value for Clients</h3>
-            <p>Every training option includes clear pricing and realistic outcomes, not sales projections.</p>
-          </div>
-          <div className="feature-card">
-            <h3>Easy Navigation</h3>
-            <p>The site is structured for fast access to home, about, training demos, and contact details.</p>
-          </div>
-        </div>
+        <Link to="/profile">
+          <button className="primary-btn">Create Account</button>
+        </Link>
       </section>
 
       <section className="section experience-section">
@@ -326,6 +332,13 @@ function AboutPage() {
         title="Pitch Video"
         allowFullScreen
       ></iframe>
+
+      <div className="section-cta">
+        <p>Ready to start training?</p>
+        <Link to="/book">
+          <button className="primary-btn">Book a Session</button>
+        </Link>
+      </div>
     </section>
   );
 }
@@ -1146,14 +1159,20 @@ function HowItWorksPage() {
             </ul>
           </div>
         </div>
+
+        <div className="section-cta">
+          <p>Ready to get on the field? Book your first session today.</p>
+          <Link to="/book">
+            <button className="primary-btn">Book a Session</button>
+          </Link>
+        </div>
       </section>
 
       <section className="section">
         <h2>Interactive AI Training Demo</h2>
         <p>
-          Select a player position and development goal. The demo will generate a
-          sample weekly plan. In a future version, this feature could analyze uploaded
-          training videos and recommend even more specific drills.
+          Select a player position and development goal to generate a sample weekly training plan.
+          Create a free account to save your plans and access them anytime from your profile.
         </p>
 
         <div className="ai-box">
@@ -1227,15 +1246,23 @@ function HowItWorksPage() {
 
           {plan && (
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
-              <button
-                onClick={handleSavePlan}
-                disabled={savingPlan}
-                className="primary-btn"
-                style={{ marginRight: '10px' }}
-              >
-                {savingPlan ? "Saving..." : "Save This Plan"}
-              </button>
-              {savedPlan && <p className="success">Plan saved successfully!</p>}
+              {user ? (
+                <>
+                  <button
+                    onClick={handleSavePlan}
+                    disabled={savingPlan}
+                    className="primary-btn"
+                    style={{ marginRight: '10px' }}
+                  >
+                    {savingPlan ? "Saving..." : "Save This Plan"}
+                  </button>
+                  {savedPlan && <p className="success">Plan saved successfully!</p>}
+                </>
+              ) : (
+                <p style={{ color: '#64748b' }}>
+                  <Link to="/profile" style={{ color: '#1d4ed8', fontWeight: '600' }}>Create a free account</Link> to save this plan to your profile.
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -1260,6 +1287,43 @@ function ContactPage() {
     position: "",
     goal: ""
   });
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistName, setWaitlistName] = useState("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
+
+  const handleJoinWaitlist = async () => {
+    if (!waitlistName.trim() || !waitlistEmail.trim()) {
+      alert("Please fill in all fields");
+      return;
+    }
+    setWaitlistLoading(true);
+    const { error } = await inquiries.create({
+      name: waitlistName.trim(),
+      email: waitlistEmail.trim(),
+      player_age: "",
+      position: "",
+      goal: "",
+      status: "new"
+    });
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_WAITLIST_TEMPLATE_ID, {
+        training_type: "Waitlist Signup",
+        player_name: waitlistName.trim(),
+        client_email: waitlistEmail.trim(),
+        notes: "New waitlist signup from contact page",
+        phone: "N/A", player_age: "N/A", position: "N/A", skill_level: "N/A",
+        goals: "N/A", preferred_date: new Date().toLocaleDateString(),
+        preferred_time: "N/A", num_players: "1", total: "N/A", location: "N/A"
+      }, EMAILJS_PUBLIC_KEY).catch(() => {});
+      setWaitlistSubmitted(true);
+      setWaitlistName("");
+      setWaitlistEmail("");
+    }
+    setWaitlistLoading(false);
+  };
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -1392,7 +1456,7 @@ function ContactPage() {
         </p>
 
         <div className="pricing-grid">
-          <div className="pricing-card featured-pricing">
+          <div className="pricing-card">
             <h3>1-on-1 Training Sessions</h3>
             <p className="price">$60</p>
             <p>
@@ -1447,6 +1511,29 @@ function ContactPage() {
             <h3>Choose Team Training if...</h3>
             <p>Your team needs better chemistry, communication, spacing, or tactical habits.</p>
           </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Join the Waitlist</h2>
+        <p>
+          Leave your name and email to hear about training openings, camps, clinics,
+          and new player development opportunities.
+        </p>
+        <div className="form">
+          {!waitlistSubmitted ? (
+            <>
+              <input placeholder="Your Name" value={waitlistName} onChange={(e) => setWaitlistName(e.target.value)} />
+              <input placeholder="Your Email" value={waitlistEmail} onChange={(e) => setWaitlistEmail(e.target.value)} />
+              <button onClick={handleJoinWaitlist} disabled={waitlistLoading}>
+                {waitlistLoading ? "Joining..." : "Join Waitlist"}
+              </button>
+            </>
+          ) : (
+            <p className="success">
+              You're on the waitlist! We'll be in touch soon.
+            </p>
+          )}
         </div>
       </section>
 

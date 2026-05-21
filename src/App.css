@@ -564,6 +564,23 @@ html {
   margin: 16px 0;
 }
 
+.section-cta {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.section-cta p {
+  font-size: 18px;
+  color: #475569;
+  margin-bottom: 16px;
+}
+
+.cta-account-section {
+  text-align: center;
+}
+
 /* IFRAME */
 iframe {
   border-radius: 16px;
