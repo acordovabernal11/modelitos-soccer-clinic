@@ -154,7 +154,7 @@ function HomePage() {
       <section className="section">
         <h2>Join the Waitlist</h2>
         <p>
-          Leave your name and email to hear about training openings, camps, clinics,
+          Leave your name and email to hear about training openings
           and new player development opportunities.
         </p>
 
@@ -272,7 +272,7 @@ function HomePage() {
             { q: "Where do sessions take place?", a: "You can choose from 4 locations: Avon Grove Middle School (West Grove, PA), United Sports Complex in Downingtown, Nixon Park in Kennett Square, and Kirkwood Sports Complex in New Castle, DE." },
             { q: "What if we need to cancel?", a: "Please cancel at least 24 hours in advance so the time slot can be opened for another player. Last-minute cancellations may still be charged." },
             { q: "Do you train in bad weather?", a: "Light rain is usually fine depending on the location. If weather makes training unsafe or impossible, we'll reschedule at no extra cost." },
-            { q: "How do I know which training type to pick?", a: "1-on-1 is best for players who want focused personal attention. Small group works great for friends training together. Team training is for organized teams. Camps and clinics are multi-session group events." },
+            { q: "How do I know which training type to pick?", a: "1-on-1 is best for players who want focused personal attention. Small group works great for friends training together. Team training is for organized teams." },
             { q: "How is payment handled?", a: "Payment is due in cash at the start of each session at the field. Nothing is charged online when you book — it's just a request that I confirm." }
           ].map(({ q, a }) => (
             <FAQItem key={q} question={q} answer={a} />
@@ -1145,19 +1145,6 @@ function HowItWorksPage() {
             </ul>
           </div>
 
-          <div className="training-card">
-            <div className="training-icon">🏆</div>
-            <h3>Camps & Clinics</h3>
-            <p>
-              High-energy training events focused on skill development, confidence,
-              competition, and player exposure.
-            </p>
-            <ul>
-              <li>Skill stations</li>
-              <li>Competitive challenges</li>
-              <li>Fun group environment</li>
-            </ul>
-          </div>
         </div>
 
         <div className="section-cta">
@@ -1402,7 +1389,7 @@ function ContactPage() {
         <div className="contact-card">
           <p><strong>Email:</strong> acordovabernal11@gmail.com</p>
           <p><strong>Location:</strong> West Grove, PA</p>
-          <p><strong>Training Types:</strong> 1-on-1, small group, team training, camps, and clinics</p>
+          <p><strong>Training Types:</strong> 1-on-1, small group, and team training</p>
           <p><strong>Best For:</strong> Youth, middle school, high school, and motivated beginner players</p>
         </div>
       </section>
@@ -1451,8 +1438,8 @@ function ContactPage() {
         <h2>Pricing</h2>
         <p>
           These training options are designed to help players build technical skill,
-          confidence, and game awareness. Small group sessions and camps/clinics are
-          priced per player, while 1-on-1 training delivers fully personalized coaching.
+          confidence, and game awareness. Small group sessions are priced per player,
+          while 1-on-1 training delivers fully personalized coaching.
         </p>
 
         <div className="pricing-grid">
@@ -1483,14 +1470,6 @@ function ContactPage() {
             </p>
           </div>
 
-          <div className="pricing-card">
-            <h3>Camps & Clinics</h3>
-            <p className="price">$100</p>
-            <p>
-              Per player. High-energy camps and clinics focus on skill stations,
-              competitive drills, and development across multiple sessions.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -1517,7 +1496,7 @@ function ContactPage() {
       <section className="section">
         <h2>Join the Waitlist</h2>
         <p>
-          Leave your name and email to hear about training openings, camps, clinics,
+          Leave your name and email to hear about training openings
           and new player development opportunities.
         </p>
         <div className="form">

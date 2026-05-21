@@ -105,25 +105,6 @@ const TRAINING_TYPES = [
     bestFor: 'Teams that need better chemistry, communication, or tactical habits before a season or tournament.',
     playerNote: null
   },
-  {
-    id: 'camp',
-    name: 'Camp / Clinic',
-    icon: '🏆',
-    price: 100,
-    priceLabel: '$100',
-    priceSub: 'per player',
-    duration: 'Multi-session',
-    description: 'High-energy training events with skill stations, competitive challenges, and individual development across multiple sessions in a group setting.',
-    includes: [
-      'Rotating skill stations (shooting, dribbling, passing)',
-      'Competitive 1v1 and small-sided challenges',
-      'Individual technique feedback',
-      'Fun, high-energy group environment',
-      'Multi-session format with structured progression'
-    ],
-    bestFor: 'Players who want intensive development across multiple sessions with a group.',
-    playerNote: 'Price is per player. Enter the number of players attending.'
-  }
 ];
 
 const STATUS_COLORS = {
@@ -167,7 +148,7 @@ export function BookingPage() {
 
   const calcPrice = () => {
     if (!selectedType) return 0;
-    if (selectedType.id === 'small_group' || selectedType.id === 'camp') {
+    if (selectedType.id === 'small_group') {
       return selectedType.price * Math.max(1, form.numPlayers);
     }
     return selectedType.price;
@@ -581,7 +562,7 @@ export function BookingPage() {
               </div>
             </div>
 
-            {(selectedType.id === 'small_group' || selectedType.id === 'camp') && (
+            {(selectedType.id === 'small_group') && (
               <div>
                 <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>
                   Number of Players <span style={{ color: '#dc2626' }}>*</span>
@@ -682,7 +663,7 @@ export function BookingPage() {
                 ['Skill Level', form.skillLevel.charAt(0).toUpperCase() + form.skillLevel.slice(1)],
                 ['Preferred Date', new Date(form.preferredDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })],
                 ['Preferred Time', form.preferredTime || 'Flexible'],
-                ...(selectedType.id === 'small_group' || selectedType.id === 'camp' ? [['Number of Players', form.numPlayers.toString()]] : []),
+                ...(selectedType.id === 'small_group' ? [['Number of Players', form.numPlayers.toString()]] : []),
                 ['Contact Email', form.clientEmail]
               ].map(([label, val]) => (
                 <div key={label}>
@@ -706,7 +687,7 @@ export function BookingPage() {
           {/* Price breakdown */}
           <div className="contact-card" style={{ marginBottom: '18px' }}>
             <h4 style={{ color: '#1e3a8a', margin: '0 0 16px', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Price Breakdown</h4>
-            {(selectedType.id === 'small_group' || selectedType.id === 'camp') ? (
+            {(selectedType.id === 'small_group') ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '15px' }}>
                   <span style={{ color: '#475569' }}>{selectedType.name}</span>
