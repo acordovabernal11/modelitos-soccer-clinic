@@ -380,7 +380,7 @@ html {
 /* TRAINING FORMAT CARDS */
 .training-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 22px;
   margin-top: 30px;
 }
@@ -534,7 +534,7 @@ html {
 /* PRICING */
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 22px;
   margin-top: 30px;
 }
@@ -841,6 +841,7 @@ iframe {
 @media (max-width: 1100px) {
   .timeline,
   .pricing-grid,
+  .training-grid,
   .experience-grid {
     grid-template-columns: repeat(2, 1fr);
   }
