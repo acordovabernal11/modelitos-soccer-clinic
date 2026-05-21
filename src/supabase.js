@@ -5,6 +5,24 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// ===== WAITLIST =====
+export const waitlist = {
+  create: async (data) => {
+    const { error } = await supabase
+      .from('waitlist')
+      .insert([data])
+    return { error }
+  },
+
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('waitlist')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  }
+}
+
 // ===== TRAINING INQUIRIES =====
 export const inquiries = {
   create: async (data) => {
