@@ -210,6 +210,21 @@ export function ProfilePage() {
     }
   };
 
+  const [cancellingId, setCancellingId] = useState(null);
+
+  const handleCancelBooking = async (bookingId) => {
+    const confirmed = window.confirm('Are you sure you want to cancel this booking? This cannot be undone.');
+    if (!confirmed) return;
+    setCancellingId(bookingId);
+    const { error } = await bookingsApi.updateStatus(bookingId, 'cancelled');
+    if (error) {
+      alert('Could not cancel booking: ' + error.message);
+    } else {
+      setSavedBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+    }
+    setCancellingId(null);
+  };
+
   const handleDeletePlan = async (planId) => {
     const { error } = await plans.delete(planId);
     if (!error) {
@@ -501,6 +516,31 @@ export function ProfilePage() {
                         ❌ Not available for this date — try booking a different day
                       </p>
                     )}
+                    {(() => {
+                      if (!['pending', 'confirmed'].includes(b.status) || !b.session_date) return null;
+                      const cutoff = new Date(new Date(b.session_date + 'T00:00:00').getTime() - 24 * 60 * 60 * 1000);
+                      const canCancel = new Date() < cutoff;
+                      if (canCancel) return (
+                        <button
+                          onClick={() => handleCancelBooking(b.id)}
+                          disabled={cancellingId === b.id}
+                          style={{
+                            marginTop: '12px', display: 'block', background: 'none',
+                            border: '1px solid #fca5a5', color: '#dc2626', padding: '7px 16px',
+                            borderRadius: '8px', fontSize: '13px', fontWeight: '700',
+                            cursor: cancellingId === b.id ? 'not-allowed' : 'pointer',
+                            opacity: cancellingId === b.id ? 0.6 : 1
+                          }}
+                        >
+                          {cancellingId === b.id ? 'Cancelling...' : 'Cancel Booking'}
+                        </button>
+                      );
+                      return (
+                        <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#94a3b8' }}>
+                          🔒 Cancellations must be made more than 24 hours before the session date.
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
               );
