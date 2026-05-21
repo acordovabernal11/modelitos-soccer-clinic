@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, bookings } from '../supabase';
+import { supabase, bookings, availability as availabilityApi } from '../supabase';
+
+const formatTime12h = (t) => {
+  const [h, m] = t.split(':').map(Number);
+  const period = h < 12 ? 'AM' : 'PM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+};
+
+const generateTimeSlots = (startTime, endTime) => {
+  const slots = [];
+  const [startH, startM] = startTime.split(':').map(Number);
+  const [endH, endM] = endTime.split(':').map(Number);
+  const endTotal = endH * 60 + endM;
+  let current = startH * 60 + startM;
+  while (current < endTotal) {
+    const h = Math.floor(current / 60);
+    const m = current % 60;
+    slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    current += 60;
+  }
+  return slots;
+};
 import emailjs from '@emailjs/browser';
 
 function usePageTitle(title) {
@@ -139,12 +161,29 @@ export function BookingPage() {
     notes: ''
   });
 
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       setUser(u);
       if (u) setForm(f => ({ ...f, clientEmail: u.email }));
     });
   }, []);
+
+  useEffect(() => {
+    if (!form.preferredDate) { setAvailableSlots([]); return; }
+    const dayOfWeek = new Date(form.preferredDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' });
+    setSlotsLoading(true);
+    updateForm('preferredTime', '');
+    availabilityApi.getActive(dayOfWeek).then(({ data }) => {
+      if (data) {
+        const slots = data.flatMap(w => generateTimeSlots(w.start_time, w.end_time));
+        setAvailableSlots(slots);
+      }
+      setSlotsLoading(false);
+    });
+  }, [form.preferredDate]);
 
   const calcPrice = () => {
     if (!selectedType) return 0;
@@ -595,32 +634,49 @@ export function BookingPage() {
               <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>The more specific, the better I can prepare.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>
-                  Preferred Date <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <input
-                  type="date"
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#0f172a' }}
-                  value={form.preferredDate}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => updateForm('preferredDate', e.target.value)}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>Preferred Time</label>
-                <select
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#0f172a', background: 'white' }}
-                  value={form.preferredTime}
-                  onChange={(e) => updateForm('preferredTime', e.target.value)}
-                >
-                  <option value="">Flexible / No preference</option>
-                  <option>Morning (8am – 12pm)</option>
-                  <option>Afternoon (12pm – 4pm)</option>
-                  <option>Evening (4pm – 8pm)</option>
-                </select>
-              </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>
+                Preferred Date <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input
+                type="date"
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#0f172a' }}
+                value={form.preferredDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => updateForm('preferredDate', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '8px', fontSize: '14px' }}>
+                Available Times <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              {!form.preferredDate ? (
+                <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>Select a date above to see available times.</p>
+              ) : slotsLoading ? (
+                <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>Loading available times...</p>
+              ) : availableSlots.length === 0 ? (
+                <p style={{ fontSize: '14px', color: '#ef4444', margin: 0 }}>No availability set for this day. Please choose a different date.</p>
+              ) : (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {availableSlots.map(slot => (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => updateForm('preferredTime', slot)}
+                      style={{
+                        padding: '10px 18px', borderRadius: '8px', border: '1px solid',
+                        borderColor: form.preferredTime === slot ? '#2563eb' : '#cbd5e1',
+                        background: form.preferredTime === slot ? '#eff6ff' : 'white',
+                        color: form.preferredTime === slot ? '#1d4ed8' : '#475569',
+                        fontWeight: '700', fontSize: '14px', cursor: 'pointer'
+                      }}
+                    >
+                      {formatTime12h(slot)}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>

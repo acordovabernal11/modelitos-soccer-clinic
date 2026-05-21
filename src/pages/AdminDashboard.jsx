@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
-import { supabase, bookings, feedback as feedbackApi } from '../supabase';
+import { supabase, bookings, feedback as feedbackApi, availability as availabilityApi } from '../supabase';
+
+const DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+const formatTime = (t) => {
+  const [h, m] = t.split(':').map(Number);
+  const period = h < 12 ? 'AM' : 'PM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+};
 
 const EMAILJS_SERVICE_ID = 'service_4kbanym';
 const EMAILJS_FEEDBACK_TEMPLATE_ID = 'template_feedback';
@@ -210,9 +219,12 @@ export function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
   const [feedbackData, setFeedbackData] = useState([]);
+  const [availabilitySlots, setAvailabilitySlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [activeView, setActiveView] = useState('bookings');
+  const [newSlot, setNewSlot] = useState({ day_of_week: 'Monday', start_time: '', end_time: '' });
+  const [slotSaving, setSlotSaving] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -222,12 +234,14 @@ export function AdminDashboard() {
     setLoading(true);
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     setUser(currentUser);
-    const [bookingsResult, feedbackResult] = await Promise.all([
+    const [bookingsResult, feedbackResult, availabilityResult] = await Promise.all([
       bookings.getAll(),
-      feedbackApi.getAll()
+      feedbackApi.getAll(),
+      availabilityApi.getAll()
     ]);
     if (bookingsResult.data) setAllBookings(bookingsResult.data);
     if (feedbackResult.data) setFeedbackData(feedbackResult.data);
+    if (availabilityResult.data) setAvailabilitySlots(availabilityResult.data);
     setLoading(false);
   };
 
@@ -244,6 +258,33 @@ export function AdminDashboard() {
     const { error } = await bookings.delete(bookingId);
     if (!error) setAllBookings(prev => prev.filter(b => b.id !== bookingId));
   };
+
+  const handleAddSlot = async () => {
+    if (!newSlot.start_time || !newSlot.end_time) { alert('Please set both a start and end time.'); return; }
+    if (newSlot.start_time >= newSlot.end_time) { alert('End time must be after start time.'); return; }
+    setSlotSaving(true);
+    const { data, error } = await availabilityApi.create({ ...newSlot, is_active: true });
+    if (error) alert('Error: ' + error.message);
+    else setAvailabilitySlots(prev => [...prev, data[0]]);
+    setSlotSaving(false);
+  };
+
+  const handleToggleSlot = async (slot) => {
+    const { data, error } = await availabilityApi.update(slot.id, { is_active: !slot.is_active });
+    if (!error) setAvailabilitySlots(prev => prev.map(s => s.id === slot.id ? data[0] : s));
+  };
+
+  const handleDeleteSlot = async (slotId) => {
+    const { error } = await availabilityApi.delete(slotId);
+    if (!error) setAvailabilitySlots(prev => prev.filter(s => s.id !== slotId));
+  };
+
+  const slotsByDay = DAYS_ORDER.reduce((acc, day) => {
+    const slots = availabilitySlots.filter(s => s.day_of_week === day)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+    if (slots.length) acc[day] = slots;
+    return acc;
+  }, {});
 
   const filtered = filterStatus === 'all' ? allBookings : allBookings.filter(b => b.status === filterStatus);
   const pendingCount = allBookings.filter(b => b.status === 'pending').length;
@@ -282,7 +323,8 @@ export function AdminDashboard() {
         <div style={{ display: 'flex', gap: '10px', marginTop: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '0' }}>
           {[
             { key: 'bookings', label: `Bookings (${allBookings.length})` },
-            { key: 'feedback', label: `Feedback (${feedbackData.length})` }
+            { key: 'feedback', label: `Feedback (${feedbackData.length})` },
+            { key: 'availability', label: `Availability (${availabilitySlots.length})` }
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -339,6 +381,86 @@ export function AdminDashboard() {
                   onStatusChange={handleStatusChange}
                   onDelete={handleDelete}
                 />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Availability view */}
+      {activeView === 'availability' && (
+        <section className="section" style={{ paddingTop: '24px' }}>
+          <h3 style={{ marginBottom: '6px', color: '#1e3a8a' }}>Add Availability Window</h3>
+          <p style={{ color: '#64748b', marginBottom: '20px', fontSize: '14px' }}>
+            Set the days and times you're available. Customers will see these as bookable time slots.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end', background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '14px', padding: '20px', marginBottom: '32px' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>Day</label>
+              <select
+                value={newSlot.day_of_week}
+                onChange={e => setNewSlot(s => ({ ...s, day_of_week: e.target.value }))}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', background: 'white' }}
+              >
+                {DAYS_ORDER.map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>Start Time</label>
+              <input type="time" value={newSlot.start_time} onChange={e => setNewSlot(s => ({ ...s, start_time: e.target.value }))}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>End Time</label>
+              <input type="time" value={newSlot.end_time} onChange={e => setNewSlot(s => ({ ...s, end_time: e.target.value }))}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
+            </div>
+            <button
+              onClick={handleAddSlot}
+              disabled={slotSaving}
+              style={{ padding: '10px 24px', background: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
+            >
+              {slotSaving ? 'Adding...' : '+ Add Window'}
+            </button>
+          </div>
+
+          {Object.keys(slotsByDay).length === 0 ? (
+            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 0' }}>No availability set yet. Add your first window above.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {Object.entries(slotsByDay).map(([day, slots]) => (
+                <div key={day}>
+                  <h4 style={{ margin: '0 0 12px', color: '#1e3a8a', fontSize: '15px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{day}</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {slots.map(slot => (
+                      <div key={slot.id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
+                        background: slot.is_active ? '#f0fdf4' : '#f8fafc',
+                        border: `1px solid ${slot.is_active ? '#86efac' : '#e2e8f0'}`,
+                        borderRadius: '10px', padding: '12px 16px'
+                      }}>
+                        <span style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px' }}>
+                          {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
+                        </span>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span style={{
+                            fontSize: '12px', fontWeight: '700', padding: '3px 10px', borderRadius: '999px',
+                            background: slot.is_active ? '#d1fae5' : '#f1f5f9',
+                            color: slot.is_active ? '#065f46' : '#94a3b8',
+                            border: `1px solid ${slot.is_active ? '#6ee7b7' : '#cbd5e1'}`
+                          }}>{slot.is_active ? 'Active' : 'Hidden'}</span>
+                          <button onClick={() => handleToggleSlot(slot)} style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#475569' }}>
+                            {slot.is_active ? 'Hide' : 'Show'}
+                          </button>
+                          <button onClick={() => handleDeleteSlot(slot.id)} style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #fca5a5', background: '#fff5f5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#dc2626' }}>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

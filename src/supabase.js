@@ -150,6 +150,52 @@ export const feedback = {
   }
 }
 
+// ===== AVAILABILITY =====
+export const availability = {
+  getActive: async (dayOfWeek) => {
+    const { data, error } = await supabase
+      .from('availability')
+      .select('*')
+      .eq('is_active', true)
+      .eq('day_of_week', dayOfWeek)
+      .order('start_time', { ascending: true })
+    return { data, error }
+  },
+
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('availability')
+      .select('*')
+      .order('created_at', { ascending: true })
+    return { data, error }
+  },
+
+  create: async (data) => {
+    const { data: result, error } = await supabase
+      .from('availability')
+      .insert([data])
+      .select()
+    return { data: result, error }
+  },
+
+  update: async (id, data) => {
+    const { data: result, error } = await supabase
+      .from('availability')
+      .update(data)
+      .eq('id', id)
+      .select()
+    return { data: result, error }
+  },
+
+  delete: async (id) => {
+    const { error } = await supabase
+      .from('availability')
+      .delete()
+      .eq('id', id)
+    return { error }
+  }
+}
+
 // ===== BOOKINGS =====
 export const bookings = {
   create: async (userId, data) => {
