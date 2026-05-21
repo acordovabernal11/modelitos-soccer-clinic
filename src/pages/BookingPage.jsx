@@ -173,10 +173,9 @@ export function BookingPage() {
 
   useEffect(() => {
     if (!form.preferredDate) { setAvailableSlots([]); return; }
-    const dayOfWeek = new Date(form.preferredDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' });
     setSlotsLoading(true);
     updateForm('preferredTime', '');
-    availabilityApi.getActive(dayOfWeek).then(({ data }) => {
+    availabilityApi.getActive(form.preferredDate).then(({ data }) => {
       if (data) {
         const slots = data.flatMap(w => generateTimeSlots(w.start_time, w.end_time));
         setAvailableSlots(slots);

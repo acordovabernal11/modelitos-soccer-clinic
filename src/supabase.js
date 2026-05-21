@@ -152,12 +152,12 @@ export const feedback = {
 
 // ===== AVAILABILITY =====
 export const availability = {
-  getActive: async (dayOfWeek) => {
+  getActive: async (date) => {
     const { data, error } = await supabase
       .from('availability')
       .select('*')
       .eq('is_active', true)
-      .eq('day_of_week', dayOfWeek)
+      .eq('date', date)
       .order('start_time', { ascending: true })
     return { data, error }
   },

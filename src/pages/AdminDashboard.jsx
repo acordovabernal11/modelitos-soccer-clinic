@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import { supabase, bookings, feedback as feedbackApi, availability as availabilityApi } from '../supabase';
 
-const DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 const formatTime = (t) => {
   const [h, m] = t.split(':').map(Number);
@@ -10,6 +10,8 @@ const formatTime = (t) => {
   const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
   return `${h12}:${String(m).padStart(2, '0')} ${period}`;
 };
+
+const formatDateDisplay = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
 const EMAILJS_SERVICE_ID = 'service_4kbanym';
 const EMAILJS_FEEDBACK_TEMPLATE_ID = 'template_feedback';
@@ -223,8 +225,10 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [activeView, setActiveView] = useState('bookings');
-  const [newSlot, setNewSlot] = useState({ day_of_week: 'Monday', start_time: '', end_time: '' });
+  const [newSlot, setNewSlot] = useState({ start_time: '', end_time: '' });
   const [slotSaving, setSlotSaving] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -260,10 +264,11 @@ export function AdminDashboard() {
   };
 
   const handleAddSlot = async () => {
-    if (!newSlot.start_time || !newSlot.end_time) { alert('Please set both a start and end time.'); return; }
+    if (!selectedDate) { alert('Please select a date on the calendar first.'); return; }
+    if (!newSlot.start_time || !newSlot.end_time) { alert('Please set a start and end time.'); return; }
     if (newSlot.start_time >= newSlot.end_time) { alert('End time must be after start time.'); return; }
     setSlotSaving(true);
-    const { data, error } = await availabilityApi.create({ ...newSlot, is_active: true });
+    const { data, error } = await availabilityApi.create({ date: selectedDate, start_time: newSlot.start_time, end_time: newSlot.end_time, is_active: true });
     if (error) alert('Error: ' + error.message);
     else setAvailabilitySlots(prev => [...prev, data[0]]);
     setSlotSaving(false);
@@ -279,12 +284,21 @@ export function AdminDashboard() {
     if (!error) setAvailabilitySlots(prev => prev.filter(s => s.id !== slotId));
   };
 
-  const slotsByDay = DAYS_ORDER.reduce((acc, day) => {
-    const slots = availabilitySlots.filter(s => s.day_of_week === day)
-      .sort((a, b) => a.start_time.localeCompare(b.start_time));
-    if (slots.length) acc[day] = slots;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const { year, month } = calendarMonth;
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const calendarCells = [];
+  for (let i = 0; i < firstDayOfMonth; i++) calendarCells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) calendarCells.push(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  while (calendarCells.length % 7 !== 0) calendarCells.push(null);
+
+  const slotsByDate = availabilitySlots.reduce((acc, slot) => {
+    if (!acc[slot.date]) acc[slot.date] = [];
+    acc[slot.date].push(slot);
     return acc;
   }, {});
+  const datesWithActiveSlots = new Set(availabilitySlots.filter(s => s.is_active).map(s => s.date));
 
   const filtered = filterStatus === 'all' ? allBookings : allBookings.filter(b => b.status === filterStatus);
   const pendingCount = allBookings.filter(b => b.status === 'pending').length;
@@ -390,80 +404,128 @@ export function AdminDashboard() {
       {/* Availability view */}
       {activeView === 'availability' && (
         <section className="section" style={{ paddingTop: '24px' }}>
-          <h3 style={{ marginBottom: '6px', color: '#1e3a8a' }}>Add Availability Window</h3>
-          <p style={{ color: '#64748b', marginBottom: '20px', fontSize: '14px' }}>
-            Set the days and times you're available. Customers will see these as bookable time slots.
-          </p>
 
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end', background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '14px', padding: '20px', marginBottom: '32px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>Day</label>
-              <select
-                value={newSlot.day_of_week}
-                onChange={e => setNewSlot(s => ({ ...s, day_of_week: e.target.value }))}
-                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', background: 'white' }}
-              >
-                {DAYS_ORDER.map(d => <option key={d}>{d}</option>)}
-              </select>
+          {/* Month navigation */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0, color: '#1e3a8a' }}>Set Availability</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button onClick={() => setCalendarMonth(m => m.month === 0 ? { year: m.year-1, month: 11 } : { ...m, month: m.month-1 })}
+                style={{ width: '34px', height: '34px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
+              <span style={{ fontWeight: '800', color: '#0f172a', minWidth: '170px', textAlign: 'center', fontSize: '16px' }}>
+                {MONTH_NAMES[month]} {year}
+              </span>
+              <button onClick={() => setCalendarMonth(m => m.month === 11 ? { year: m.year+1, month: 0 } : { ...m, month: m.month+1 })}
+                style={{ width: '34px', height: '34px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
             </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>Start Time</label>
-              <input type="time" value={newSlot.start_time} onChange={e => setNewSlot(s => ({ ...s, start_time: e.target.value }))}
-                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: '700', fontSize: '13px', color: '#1e3a8a', marginBottom: '6px' }}>End Time</label>
-              <input type="time" value={newSlot.end_time} onChange={e => setNewSlot(s => ({ ...s, end_time: e.target.value }))}
-                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
-            </div>
-            <button
-              onClick={handleAddSlot}
-              disabled={slotSaving}
-              style={{ padding: '10px 24px', background: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
-            >
-              {slotSaving ? 'Adding...' : '+ Add Window'}
-            </button>
           </div>
 
-          {Object.keys(slotsByDay).length === 0 ? (
-            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 0' }}>No availability set yet. Add your first window above.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {Object.entries(slotsByDay).map(([day, slots]) => (
-                <div key={day}>
-                  <h4 style={{ margin: '0 0 12px', color: '#1e3a8a', fontSize: '15px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{day}</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {slots.map(slot => (
-                      <div key={slot.id} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
-                        background: slot.is_active ? '#f0fdf4' : '#f8fafc',
-                        border: `1px solid ${slot.is_active ? '#86efac' : '#e2e8f0'}`,
-                        borderRadius: '10px', padding: '12px 16px'
-                      }}>
-                        <span style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px' }}>
-                          {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
-                        </span>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span style={{
-                            fontSize: '12px', fontWeight: '700', padding: '3px 10px', borderRadius: '999px',
-                            background: slot.is_active ? '#d1fae5' : '#f1f5f9',
-                            color: slot.is_active ? '#065f46' : '#94a3b8',
-                            border: `1px solid ${slot.is_active ? '#6ee7b7' : '#cbd5e1'}`
-                          }}>{slot.is_active ? 'Active' : 'Hidden'}</span>
-                          <button onClick={() => handleToggleSlot(slot)} style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#475569' }}>
-                            {slot.is_active ? 'Hide' : 'Show'}
-                          </button>
-                          <button onClick={() => handleDeleteSlot(slot.id)} style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #fca5a5', background: '#fff5f5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#dc2626' }}>
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          {/* Day headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
+            {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
+              <div key={d} style={{ textAlign: 'center', fontWeight: '700', fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', padding: '6px 0' }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '24px' }}>
+            {calendarCells.map((dateStr, i) => {
+              if (!dateStr) return <div key={i} style={{ height: '52px' }} />;
+              const dayNum = parseInt(dateStr.split('-')[2]);
+              const isToday = dateStr === todayStr;
+              const isSelected = dateStr === selectedDate;
+              const hasActive = datesWithActiveSlots.has(dateStr);
+              const isPast = dateStr < todayStr;
+              return (
+                <div
+                  key={dateStr}
+                  onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                  style={{
+                    height: '52px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    justifyContent: 'center', borderRadius: '10px', cursor: 'pointer', position: 'relative',
+                    border: isSelected ? '2px solid #2563eb' : isToday ? '2px solid #fbbf24' : '2px solid transparent',
+                    background: isSelected ? '#eff6ff' : hasActive ? '#f0fdf4' : '#f8fafc',
+                    color: isPast && !isToday ? '#cbd5e1' : '#0f172a',
+                    fontWeight: isToday ? '800' : '500', fontSize: '15px',
+                    transition: 'all 0.1s ease'
+                  }}
+                >
+                  {dayNum}
+                  {hasActive && <span style={{ position: 'absolute', bottom: '6px', width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />}
                 </div>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* Selected date panel */}
+          {selectedDate ? (
+            <div style={{ background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '14px', padding: '20px' }}>
+              <h4 style={{ margin: '0 0 16px', color: '#1e3a8a', fontSize: '16px' }}>{formatDateDisplay(selectedDate)}</h4>
+
+              {(slotsByDate[selectedDate] || []).length === 0 ? (
+                <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 16px' }}>No time windows set for this day yet.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                  {(slotsByDate[selectedDate] || []).sort((a,b) => a.start_time.localeCompare(b.start_time)).map(slot => (
+                    <div key={slot.id} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px',
+                      background: slot.is_active ? '#f0fdf4' : '#f8fafc',
+                      border: `1px solid ${slot.is_active ? '#86efac' : '#e2e8f0'}`,
+                      borderRadius: '8px', padding: '10px 14px'
+                    }}>
+                      <span style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px' }}>
+                        {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
+                      </span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '700', padding: '3px 10px', borderRadius: '999px', background: slot.is_active ? '#d1fae5' : '#f1f5f9', color: slot.is_active ? '#065f46' : '#94a3b8', border: `1px solid ${slot.is_active ? '#6ee7b7' : '#cbd5e1'}` }}>
+                          {slot.is_active ? 'Active' : 'Hidden'}
+                        </span>
+                        <button onClick={() => handleToggleSlot(slot)} style={{ padding: '5px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#475569' }}>
+                          {slot.is_active ? 'Hide' : 'Show'}
+                        </button>
+                        <button onClick={() => handleDeleteSlot(slot.id)} style={{ padding: '5px 12px', borderRadius: '6px', border: '1px solid #fca5a5', background: '#fff5f5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', color: '#dc2626' }}>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', fontSize: '12px', color: '#1e3a8a', marginBottom: '4px' }}>Start</label>
+                  <input type="time" value={newSlot.start_time} onChange={e => setNewSlot(s => ({ ...s, start_time: e.target.value }))}
+                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', fontSize: '12px', color: '#1e3a8a', marginBottom: '4px' }}>End</label>
+                  <input type="time" value={newSlot.end_time} onChange={e => setNewSlot(s => ({ ...s, end_time: e.target.value }))}
+                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a' }} />
+                </div>
+                <button onClick={handleAddSlot} disabled={slotSaving}
+                  style={{ padding: '9px 20px', background: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>
+                  {slotSaving ? 'Saving...' : '+ Add Window'}
+                </button>
+              </div>
             </div>
+          ) : (
+            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '16px 0', fontSize: '14px' }}>
+              Click any date on the calendar to set or edit availability.
+            </p>
           )}
+
+          {/* Legend */}
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '20px', fontSize: '13px', color: '#64748b' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f0fdf4', border: '1px solid #86efac', display: 'inline-block' }} /> Has availability
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#eff6ff', border: '2px solid #2563eb', display: 'inline-block' }} /> Selected
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f8fafc', border: '2px solid #fbbf24', display: 'inline-block' }} /> Today
+            </span>
+          </div>
         </section>
       )}
 
