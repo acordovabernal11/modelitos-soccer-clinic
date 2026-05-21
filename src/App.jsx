@@ -117,7 +117,7 @@ function HomePage() {
     <>
       <section className="hero">
         <div className="hero-overlay">
-          <p className="eyebrow">College-Level Player • Mexico & Spain Professional Playing Experience • AI Training Plans</p>
+          <p className="eyebrow">College-Level Player • Mexico & Spain Professional Playing Experience • Modelitos Training Plans</p>
           <h1>Elite Soccer Training for Players Who Want to Stand Out</h1>
           <p className="hero-text">
             Modelitos Soccer Clinic helps motivated soccer players improve their technique,
@@ -144,7 +144,7 @@ function HomePage() {
               <p>Built from real college competition and professional play in Mexico and Spain.</p>
             </div>
             <div className="badge-card">
-              <h3>AI Training Plans</h3>
+              <h3>Modelitos Training Plans</h3>
               <p>Actionable weekly plans with focus, drills, and coaching tips.</p>
             </div>
           </div>
@@ -196,7 +196,7 @@ function HomePage() {
       <section className="section cta-account-section">
         <h2>Create a Free Account</h2>
         <p>
-          Sign up to save your AI training plans, track your booked sessions,
+          Sign up to save your Modelitos training plans, track your booked sessions,
           and log your progress — all in one place.
         </p>
         <Link to="/profile">
@@ -249,7 +249,7 @@ function HomePage() {
           {[
             { quote: "My son went from nervous on the ball to confident and aggressive in just a few sessions. The coaching is detailed and actually explains the why behind every drill.", name: "Parent of U14 Player", location: "West Grove, PA" },
             { quote: "I've trained with a lot of coaches and this is the first time I felt like the sessions were built specifically for me. My first touch and decision-making improved fast.", name: "High School Midfielder", location: "Kennett Square, PA" },
-            { quote: "The AI training plan alone is worth it. I use it between sessions to keep working on my weak foot. I can already feel the difference in games.", name: "Club Player, U16", location: "Downingtown, PA" }
+            { quote: "The Modelitos training plan alone is worth it. I use it between sessions to keep working on my weak foot. I can already feel the difference in games.", name: "Club Player, U16", location: "Downingtown, PA" }
           ].map(({ quote, name, location }) => (
             <div key={name} style={{ background: '#f8fbff', border: '1px solid #bfdbfe', borderRadius: '18px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <p style={{ color: '#334155', lineHeight: '1.8', fontSize: '15px', fontStyle: 'italic', margin: '0 0 20px' }}>"{quote}"</p>
@@ -314,7 +314,7 @@ function AboutPage() {
         Modelitos Soccer Clinic is a soccer training service focused on helping players
         improve with purpose. Instead of doing random drills, each session is designed
         around the player’s position, skill level, goals, and areas for improvement.
-        The service combines live coaching with AI-powered training recommendations so
+        The service combines live coaching with Modelitos training recommendations so
         players know exactly what to work on next.
       </p>
 
@@ -1061,7 +1061,7 @@ function HowItWorksPage() {
         <h2>How It Works</h2>
         <p>
           Modelitos Soccer Clinic uses a simple but powerful process: evaluate the player,
-          identify the goal, train with purpose, and use AI-generated drill plans to keep
+          identify the goal, train with purpose, and use Modelitos drill plans to keep
           development going after the session ends.
         </p>
 
@@ -1078,8 +1078,8 @@ function HowItWorksPage() {
           </div>
           <div className="timeline-card">
             <span>03</span>
-            <h3>AI Drill Plan</h3>
-            <p>The AI demo generates a custom training plan based on position and skill focus.</p>
+            <h3>Modelitos Drill Plan</h3>
+            <p>The demo generates a custom training plan based on position and skill focus.</p>
           </div>
           <div className="timeline-card">
             <span>04</span>
@@ -1169,7 +1169,7 @@ function HowItWorksPage() {
       </section>
 
       <section className="section">
-        <h2>Interactive AI Training Demo</h2>
+        <h2>Modelitos Training Plan Demo</h2>
         <p>
           Select a player position and development goal to generate a sample weekly training plan.
           Create a free account to save your plans and access them anytime from your profile.
