@@ -152,6 +152,15 @@ export const feedback = {
 
 // ===== AVAILABILITY =====
 export const availability = {
+  getActiveDates: async () => {
+    const { data, error } = await supabase
+      .from('availability')
+      .select('date')
+      .eq('is_active', true)
+      .order('date', { ascending: true })
+    return { data, error }
+  },
+
   getActive: async (date) => {
     const { data, error } = await supabase
       .from('availability')

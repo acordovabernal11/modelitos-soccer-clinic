@@ -1025,7 +1025,7 @@ function HowItWorksPage() {
     setTimeout(() => {
       setPlan(plans[position]?.[goal] || defaultPlan);
       setLoading(false);
-    }, 1200);
+    }, 10000);
   };
 
   const handleSavePlan = async () => {

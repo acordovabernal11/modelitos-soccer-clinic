@@ -163,11 +163,20 @@ export function BookingPage() {
 
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [availableDates, setAvailableDates] = useState(new Set());
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const [emailError, setEmailError] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       setUser(u);
       if (u) setForm(f => ({ ...f, clientEmail: u.email }));
+    });
+  }, []);
+
+  useEffect(() => {
+    availabilityApi.getActiveDates().then(({ data }) => {
+      if (data) setAvailableDates(new Set(data.map(r => r.date)));
     });
   }, []);
 
@@ -237,7 +246,7 @@ export function BookingPage() {
         client_email: form.clientEmail,
         notes: form.notes || 'None',
         location: selectedLocation ? `${selectedLocation.name} — ${selectedLocation.address}` : 'Not specified'
-      }, EMAILJS_PUBLIC_KEY).catch(() => {});
+      }, EMAILJS_PUBLIC_KEY).catch(() => { setEmailError(true); });
 
       setSubmittedBooking({ ...form, type: selectedType, total: calcPrice() });
       setSubmitted(true);
@@ -276,17 +285,36 @@ export function BookingPage() {
     window.scrollTo(0, 0);
   };
 
+  const prevMonth = () => setCalendarMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1));
+  const nextMonth = () => setCalendarMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1));
+
   // ── Success screen ──────────────────────────────────────────────────────────
   if (submitted && submittedBooking) {
     const s = submittedBooking;
     return (
       <section className="section" style={{ maxWidth: '660px', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
-        <h2 style={{ marginBottom: '8px' }}>Booking Request Submitted!</h2>
-        <p style={{ color: '#475569', marginBottom: '28px' }}>
-          Your request for a <strong>{s.type.name}</strong> has been received.
-          I'll review availability and confirm within <strong>24 hours</strong>.
+        <h2 style={{ marginBottom: '8px' }}>Thank You for Booking!</h2>
+        <p style={{ color: '#475569', marginBottom: '8px', fontSize: '16px', lineHeight: '1.7' }}>
+          Thank you for choosing <strong>Modelitos Soccer Clinic</strong>, {s.playerName}. Your <strong>{s.type.name}</strong> request has been successfully received and is now under review.
         </p>
+        <p style={{ color: '#475569', marginBottom: '20px', fontSize: '15px', lineHeight: '1.7' }}>
+          I personally review every booking request and will confirm your session within <strong>24 hours</strong>. Once confirmed, you'll receive a follow-up with the exact field location and any session details to prepare.
+        </p>
+        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '16px 20px', marginBottom: '28px', textAlign: 'left' }}>
+          <p style={{ margin: '0 0 6px', fontWeight: '700', color: '#1e3a8a', fontSize: '14px' }}>✉️ Confirmation Email On Its Way</p>
+          <p style={{ margin: 0, color: '#1e40af', fontSize: '14px', lineHeight: '1.6' }}>
+            A confirmation has been sent to <strong>{s.clientEmail}</strong>. If you don't see it within a few minutes, please check your spam or junk folder. For any questions, feel free to reach out directly through the Contact page.
+          </p>
+        </div>
+        {emailError && (
+          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', padding: '14px 18px', marginBottom: '16px', textAlign: 'left' }}>
+            <p style={{ margin: '0 0 4px', fontWeight: '700', color: '#c2410c', fontSize: '14px' }}>⚠️ Email Delivery Issue</p>
+            <p style={{ margin: 0, color: '#92400e', fontSize: '13px', lineHeight: '1.6' }}>
+              Your booking was saved successfully, but the confirmation email could not be delivered at this time. Please contact us directly through the Contact page to confirm your request was received.
+            </p>
+          </div>
+        )}
 
         <div className="contact-card" style={{ textAlign: 'left', marginBottom: '16px' }}>
           <h3 style={{ color: '#1e3a8a', marginTop: 0, marginBottom: '16px' }}>Your Request Summary</h3>
@@ -349,6 +377,14 @@ export function BookingPage() {
         <section className="section">
           <h3 style={{ color: '#1e3a8a', marginTop: 0 }}>What type of training are you booking?</h3>
           <p style={{ color: '#475569', marginBottom: '24px' }}>Select the option that fits your needs. All sessions are paid in cash at the field.</p>
+
+          {!user && (
+            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', padding: '14px 18px', marginBottom: '20px' }}>
+              <p style={{ margin: 0, color: '#c2410c', fontSize: '14px', fontWeight: '600' }}>
+                You'll need to <Link to="/profile" style={{ color: '#ea580c' }}>sign in</Link> before confirming your booking. You can browse and fill in your details now.
+              </p>
+            </div>
+          )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {TRAINING_TYPES.map((type) => (
@@ -634,16 +670,80 @@ export function BookingPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '6px', fontSize: '14px' }}>
+              <label style={{ display: 'block', fontWeight: '700', color: '#1e3a8a', marginBottom: '8px', fontSize: '14px' }}>
                 Preferred Date <span style={{ color: '#dc2626' }}>*</span>
               </label>
-              <input
-                type="date"
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#0f172a' }}
-                value={form.preferredDate}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={(e) => updateForm('preferredDate', e.target.value)}
-              />
+              {(() => {
+                const today = new Date().toISOString().split('T')[0];
+                const year = calendarMonth.getFullYear();
+                const month = calendarMonth.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const calendarDays = [
+                  ...Array(firstDay).fill(null),
+                  ...Array.from({ length: daysInMonth }, (_, i) => {
+                    const d = i + 1;
+                    return `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                  })
+                ];
+                return (
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '14px', padding: '16px', background: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <button type="button" onClick={prevMonth} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '16px', color: '#475569' }}>‹</button>
+                      <span style={{ fontWeight: '700', color: '#1e3a8a', fontSize: '15px' }}>
+                        {calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <button type="button" onClick={nextMonth} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '16px', color: '#475569' }}>›</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '4px' }}>
+                      {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                        <div key={d} style={{ textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#94a3b8', padding: '4px 0' }}>{d}</div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+                      {calendarDays.map((dateStr, i) => {
+                        if (!dateStr) return <div key={`e-${i}`} />;
+                        const isAvailable = availableDates.has(dateStr);
+                        const isPast = dateStr < today;
+                        const isSelected = form.preferredDate === dateStr;
+                        const disabled = !isAvailable || isPast;
+                        return (
+                          <button
+                            key={dateStr}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => { updateForm('preferredDate', dateStr); }}
+                            style={{
+                              padding: '9px 2px', borderRadius: '8px',
+                              border: isSelected ? '2px solid #2563eb' : '1px solid transparent',
+                              background: isSelected ? '#eff6ff' : isAvailable && !isPast ? '#f0fdf4' : 'transparent',
+                              color: isSelected ? '#1d4ed8' : isAvailable && !isPast ? '#15803d' : '#cbd5e1',
+                              fontWeight: isAvailable && !isPast ? '700' : '400',
+                              cursor: disabled ? 'default' : 'pointer',
+                              fontSize: '13px', textAlign: 'center'
+                            }}
+                          >
+                            {parseInt(dateStr.split('-')[2])}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {availableDates.size === 0 && (
+                      <p style={{ margin: '12px 0 0', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>Loading available dates...</p>
+                    )}
+                    {availableDates.size > 0 && (
+                      <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '12px', color: '#64748b' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f0fdf4', border: '1px solid #86efac', display: 'inline-block' }} /> Available
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#eff6ff', border: '2px solid #2563eb', display: 'inline-block' }} /> Selected
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             <div>
