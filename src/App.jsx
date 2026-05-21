@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link, useSearchParams } from "react-router-dom";
-import { supabase, inquiries, waitlist as waitlistApi, plans, feedback } from "./supabase";
+import { supabase, inquiries, plans, feedback } from "./supabase";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { BookingPage } from "./pages/BookingPage";
@@ -78,10 +78,13 @@ function HomePage() {
     }
 
     setLoading(true);
-    const { error } = await waitlistApi.create({
+    const { error } = await inquiries.create({
       name: name.trim(),
       email: email.trim(),
-      status: "new"
+      player_age: "",
+      position: "waitlist",
+      goal: "waitlist",
+      status: "waitlist"
     });
 
     if (error) {
@@ -1295,10 +1298,13 @@ function ContactPage() {
       return;
     }
     setWaitlistLoading(true);
-    const { error } = await waitlistApi.create({
+    const { error } = await inquiries.create({
       name: waitlistName.trim(),
       email: waitlistEmail.trim(),
-      status: "new"
+      player_age: "",
+      position: "waitlist",
+      goal: "waitlist",
+      status: "waitlist"
     });
     if (error) {
       alert("Error: " + error.message);
